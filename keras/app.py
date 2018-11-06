@@ -121,19 +121,19 @@ categories = 2;
 model = Sequential()
 # input: 100x100 images with 3 channels -> (100, 100, 3) tensors.
 # this applies 32 convolution filters of size 3x3 each.
-model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
-model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
+model.add(Conv2D(100, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
+# model.add(Conv2D(32, (3, 3), activation='relu'))
+model.add(MaxPooling2D(pool_size=(5, 5)))
 model.add(Dropout(0.25))
 
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(Conv2D(64, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Dropout(0.25))
+# model.add(Conv2D(64, (3, 3), activation='relu'))
+# model.add(Conv2D(64, (3, 3), activation='relu'))
+# model.add(MaxPooling2D(pool_size=(2, 2)))
+# model.add(Dropout(0.25))
 
 model.add(Flatten())
-model.add(Dense(256, activation='relu'))
-model.add(Dropout(0.5))
+# model.add(Dense(256, activation='relu'))
+# model.add(Dropout(0.5))
 model.add(Dense(categories, activation='softmax'))
 
 sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
