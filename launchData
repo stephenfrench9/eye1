@@ -1,0 +1,5 @@
+#!/bin/bash
+docker container stop rick
+docker container rm rick
+docker image build -t rodrigo $(pwd)/dataGetter/
+docker run --name rick -v $(pwd):/kaggleData rodrigo
