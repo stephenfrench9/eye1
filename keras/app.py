@@ -143,9 +143,9 @@ model.compile(loss='categorical_crossentropy', optimizer=sgd)
 
 # ------------------------ Fit the Model -------------------------------
 
-model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:200], batch_size=10),
-                    steps_per_epoch = 200,
-                    epochs = 10,
+model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=10),
+                    steps_per_epoch = 100,
+                    epochs = 5,
                     validation_data = CIFAR10Sequence(train_labels=train_labels[200:220], batch_size=5),
                     validation_steps = 20)
 
@@ -166,7 +166,7 @@ for i in range(test_size):
     y[i] = train_labels.at[sample, labels.get(0)]
 
 x = x[1:, :, :, :]
-y = y.reshape(self.batch_size, 1)
+y = y.reshape(test_size, 1)
 y = keras.utils.to_categorical(y, num_classes=2)
 
 y_pred = model.predict(x)
