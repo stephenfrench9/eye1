@@ -150,3 +150,28 @@ model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:200]
                     validation_steps = 20)
 
 
+test_size = 40
+y = np.ones(test_size)
+x = np.ones((1, 512, 512, 4))
+for i in range(test_size):
+    sample = i
+    b = imread(base + train_labels.at[sample, 'Id'] + red).reshape((512, 512, 1))
+    r = imread(base + train_labels.at[sample, 'Id'] + red).reshape((512, 512, 1))
+    ye = imread(base + train_labels.at[sample, 'Id'] + yellow).reshape((512, 512, 1))
+    g = imread(base + train_labels.at[sample, 'Id'] + green).reshape((512, 512, 1))
+    im = np.append(b, r, axis=2)
+    im = np.append(im, ye, axis=2)
+    im = np.append(im, g, axis=2)
+    x = np.append(x, [im], axis=0)
+    y[i] = train_labels.at[sample, labels.get(0)]
+
+x = x[1:, :, :, :]
+y = y.reshape(self.batch_size, 1)
+y = keras.utils.to_categorical(y, num_classes=2)
+
+y_pred = model.predict(x)
+
+print("the predicted values are: ")
+print(y_pred)
+print("the actual values are: ")
+print(y)
