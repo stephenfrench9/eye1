@@ -21,7 +21,7 @@ print(os.listdir("."))
 
 # -----------------------Initialize train labels, label names----------------------------
 
-train_labels = pd.read_csv("train.csv")
+train_labels = pd.read_csv("train.csv", nrows=140)
 labels = {
     0:  "Nucleoplasm",
     1:  "Nuclear membrane",
@@ -99,9 +99,17 @@ class CIFAR10Sequence(Sequence):
         for i in range(self.batch_size):
             sample = i + idx * self.batch_size
             b = imread(base + train_labels.at[sample, 'Id'] + red).reshape((512, 512, 1))
+            b = b / np.std(b)
+            b = b - b.mean()
             r = imread(base + train_labels.at[sample, 'Id'] + red).reshape((512, 512, 1))
+            r = r / np.std(r)
+            r = r - r.mean()
             ye = imread(base + train_labels.at[sample, 'Id'] + yellow).reshape((512, 512, 1))
+            ye = ye / np.std(ye)
+            ye = ye - ye.mean()
             g = imread(base + train_labels.at[sample, 'Id'] + green).reshape((512, 512, 1))
+            g = g / np.std(g)
+            g = g - g.mean()
             im = np.append(b, r, axis=2)
             im = np.append(im, ye, axis=2)
             im = np.append(im, g, axis=2)
@@ -146,32 +154,29 @@ model.compile(loss='categorical_crossentropy', optimizer=sgd)
 model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=10),
                     steps_per_epoch = 100,
                     epochs = 5,
-                    validation_data = CIFAR10Sequence(train_labels=train_labels[200:220], batch_size=5),
-                    validation_steps = 20)
+                    validation_data = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=5),
+                    validation_steps = 40)
 
+# train_generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=10)
+#
+# x, y = train_generator.__getitem__(1);
+# print("The generated data has mean: " + str(x.mean()))
+# print("The generated data has std: " + str(np.std(x)))
+# print("The generated data has shape: " + str(x.shape))
+# print("Train generator batches: " + str(train_generator.__len__()));
+# ----------------------------- Test Data -------------------------------------
 
-test_size = 40
-y = np.ones(test_size)
-x = np.ones((1, 512, 512, 4))
-for i in range(test_size):
-    sample = i
-    b = imread(base + train_labels.at[sample, 'Id'] + red).reshape((512, 512, 1))
-    r = imread(base + train_labels.at[sample, 'Id'] + red).reshape((512, 512, 1))
-    ye = imread(base + train_labels.at[sample, 'Id'] + yellow).reshape((512, 512, 1))
-    g = imread(base + train_labels.at[sample, 'Id'] + green).reshape((512, 512, 1))
-    im = np.append(b, r, axis=2)
-    im = np.append(im, ye, axis=2)
-    im = np.append(im, g, axis=2)
-    x = np.append(x, [im], axis=0)
-    y[i] = train_labels.at[sample, labels.get(0)]
+test_generator = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=40)
+x_test, y_test = test_generator.__getitem__(1);
+print("The generated test data has mean: " + str(x_test.mean()))
+print("The generated test data has std: " + str(np.std(x_test)))
+print("The generated test data has shape: " + str(x_test.shape))
+print("Test generator batches: " + str(test_generator.__len__()));
 
-x = x[1:, :, :, :]
-y = y.reshape(test_size, 1)
-y = keras.utils.to_categorical(y, num_classes=2)
+y_pred = model.predict(x_test)
 
-y_pred = model.predict(x)
-
-print("the predicted values are: ")
+print("Predictions")
 print(y_pred)
-print("the actual values are: ")
-print(y)
+print("Actuals")
+print(y_test)
+
