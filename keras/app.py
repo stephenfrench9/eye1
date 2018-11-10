@@ -173,6 +173,7 @@ print("The generated test data has std: " + str(np.std(x_test)))
 print("The generated test data has shape: " + str(x_test.shape))
 print("Test generator batches: " + str(test_generator.__len__()));
 
+
 y_pred = model.predict(x_test)
 
 print("Predictions")
