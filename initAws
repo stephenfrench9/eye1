@@ -1,0 +1,20 @@
+sudo yum update -y 
+sudo yum install -y docker
+sudo service docker start
+sudo usermod -a -G docker ec2-user
+sudo yum install git
+git clone https://github.com/stephenfrench9/eye.git
+./launchData
+mkdir train
+mkdir test
+mv test.zip test
+mv train.zip train
+cd test
+unzip test.zip
+rm -f test.zip
+cd ../train
+unzip train.zip
+rm -f train.zip
+cd ..
+
+
