@@ -137,8 +137,8 @@ ax0range=10; ax1range=100; ax2range=100; ax3range=4;
 categories = 2;
 
 
-lrs = [math.pow(10, i) for i in range(-2, 3, 1)]
-momentums = [.1, .3, .5, .7, .9]
+lrs = [math.pow(10, i) for i in range(-2, 1, 1)]
+momentums = [.1, .9]
 
 print(lrs)
 print(momentums)
@@ -177,10 +177,10 @@ for lr in lrs:
 
         # ------------------------ Fit the Model -------------------------------
 
-        train_history = model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=20),
+        train_history = model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=100),
                             steps_per_epoch = 100,
-                            epochs = 5,
-                            validation_data = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=10),
+                            epochs = 3,
+                            validation_data = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=40),
                             validation_steps = 40)
 
         # -----------------------record the results---------------------------
