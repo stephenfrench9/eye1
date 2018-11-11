@@ -3,7 +3,7 @@ from keras.models import Sequential
 from os import listdir
 import keras
 from keras.layers import Dense, Dropout, Flatten
-from keras.layers import Conv2D, MaxPooling2D
+from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
 from keras.optimizers import SGD
 import numpy as np # linear algebra
 import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
