@@ -1,5 +1,5 @@
 import os
-from keras.models import Sequential
+from keras.models import Sequential, model_from_json
 from os import listdir
 import keras
 from keras.layers import Dense, Dropout, Flatten
@@ -96,34 +96,43 @@ class CIFAR10Sequence(Sequence):
         trials = len(self.train_labels)
         y = np.ones(self.batch_size)
         x = np.ones((1, 512, 512, 4))
+        # x = np.ones((1, 512, 512))
         for i in range(self.batch_size):
             sample = i + idx * self.batch_size
             b = imread(base + train_labels.at[sample, 'Id'] + red).reshape((512, 512, 1))
             b = b / np.std(b)
             b = b - b.mean()
-            r = imread(base + train_labels.at[sample, 'Id'] + red).reshape((512, 512, 1))
+            r = imread(base + train_labels.at[sample, 'Id'] + blue).reshape((512, 512, 1))
             r = r / np.std(r)
             r = r - r.mean()
             ye = imread(base + train_labels.at[sample, 'Id'] + yellow).reshape((512, 512, 1))
             ye = ye / np.std(ye)
             ye = ye - ye.mean()
             g = imread(base + train_labels.at[sample, 'Id'] + green).reshape((512, 512, 1))
+            # g = imread(base + train_labels.at[sample, 'Id'] + green).reshape((1, 512, 512))
             g = g / np.std(g)
             g = g - g.mean()
             im = np.append(b, r, axis=2)
             im = np.append(im, ye, axis=2)
             im = np.append(im, g, axis=2)
             x = np.append(x, [im], axis=0)
+            # print("#############################")
+            # print("x: " + str(x.shape))
+            # print("g: " + str(g.shape))
+            # print('###############################')
+            # x = np.append(x, g, axis=0)
             y[i] = train_labels.at[sample, labels.get(0)]
 
-        x = x[1:, :, :, :]
+        x = x[1:, 100:200, 100:200, :]
+
+
         y = y.reshape(self.batch_size, 1)
         y = keras.utils.to_categorical(y, num_classes=2)
 
         return x, y
 
 # ------------------------- Define Model -----------------------------
-ax0range=10; ax1range=512; ax2range=512; ax3range=4;
+ax0range=10; ax1range=100; ax2range=100; ax3range=4;
 categories = 2;
 
 model = Sequential()
@@ -146,10 +155,21 @@ model.add(BatchNormalization(axis=1))
 # model.add(Dropout(0.5))
 model.add(Dense(categories, activation='softmax'))
 
+
+
 sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
 
 model.compile(loss='categorical_crossentropy', optimizer=sgd)
 
+
+with open("model.json", "w") as json_file:
+    json_model = model.to_json()
+    json_file.write(json_model)
+
+# with open("model.json", "r") as json_file:
+#     json_model = json_file.read()
+#     model = model_from_json(json_model)
+# model.load_weights('weights')
 
 # ------------------------ Fit the Model -------------------------------
 
