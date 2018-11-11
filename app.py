@@ -1,4 +1,5 @@
 import os
+import math
 from keras.models import Sequential, model_from_json
 from os import listdir
 import keras
@@ -135,71 +136,77 @@ class CIFAR10Sequence(Sequence):
 ax0range=10; ax1range=100; ax2range=100; ax3range=4;
 categories = 2;
 
-model = Sequential()
-# input: 100x100 images with 3 channels -> (100, 100, 3) tensors.
-# this applies 32 convolution filters of size 3x3 each.
-model.add(Conv2D(100, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
-# model.add(Conv2D(32, (3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(5, 5)))
-model.add(Dropout(0.25))
 
+lrs = [math.pow(10, i) for i in range(-2, 3, 1)]
+momentums = [.1, .3, .5, .7, .9]
 
-# model.add(Conv2D(64, (3, 3), activation='relu'))
-# model.add(Conv2D(64, (3, 3), activation='relu'))
-# model.add(MaxPooling2D(pool_size=(2, 2)))
-# model.add(Dropout(0.25))
+print(lrs)
+print(momentums)
+f = open("records.txt", "w")
+for lr in lrs:
+    for m in momentums:
+        print("-------" + str(lr) + " : " + str(m) + "--------")
+        model = Sequential()
+        # input: 100x100 images with 3 channels -> (100, 100, 3) tensors.
+        # this applies 32 convolution filters of size 3x3 each.
+        model.add(Conv2D(100, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
+        # model.add(Conv2D(32, (3, 3), activation='relu'))
+        model.add(MaxPooling2D(pool_size=(5, 5)))
+        model.add(Dropout(0.25))
+        # model.add(Conv2D(64, (3, 3), activation='relu'))
+        # model.add(Conv2D(64, (3, 3), activation='relu'))
+        # model.add(MaxPooling2D(pool_size=(2, 2)))
+        # model.add(Dropout(0.25))
+        model.add(Flatten())
+        model.add(BatchNormalization(axis=1))
+        # model.add(Dense(256, activation='relu'))
+        # model.add(Dropout(0.5))
+        model.add(Dense(categories, activation='softmax'))
+        sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+        model.compile(loss='categorical_crossentropy', optimizer=sgd)
 
-model.add(Flatten())
-model.add(BatchNormalization(axis=1))
-# model.add(Dense(256, activation='relu'))
-# model.add(Dropout(0.5))
-model.add(Dense(categories, activation='softmax'))
+        # with open("model.json", "w") as json_file:
+        #     json_model = model.to_json()
+        #     json_file.write(json_model)
+        # model.save('weights')
 
+        # with open("model.json", "r") as json_file:
+        #     json_model = json_file.read()
+        #     model = model_from_json(json_model)
+        # model.load_weights('weights')
 
+        # ------------------------ Fit the Model -------------------------------
 
-sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+        train_history = model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=20),
+                            steps_per_epoch = 100,
+                            epochs = 5,
+                            validation_data = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=10),
+                            validation_steps = 40)
 
-model.compile(loss='categorical_crossentropy', optimizer=sgd)
+        # -----------------------record the results---------------------------
 
+        losses = train_history.history['loss']
+        val_losses = train_history.history['val_loss']
 
-with open("model.json", "w") as json_file:
-    json_model = model.to_json()
-    json_file.write(json_model)
+        f.write("-------" + str(lr) + " : " + str(m) + "--------\n")
+        f.write("losses: " + str([round(l, 3) for l in losses]) + " \n")
+        f.write("val_losses: " + str([round(v, 3) for v in val_losses]) + " \n\n")
+f.close()
 
-# with open("model.json", "r") as json_file:
-#     json_model = json_file.read()
-#     model = model_from_json(json_model)
-# model.load_weights('weights')
-
-# ------------------------ Fit the Model -------------------------------
-
-model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=10),
-                    steps_per_epoch = 100,
-                    epochs = 5,
-                    validation_data = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=5),
-                    validation_steps = 40)
-
-# train_generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=10)
-#
-# x, y = train_generator.__getitem__(1);
-# print("The generated data has mean: " + str(x.mean()))
-# print("The generated data has std: " + str(np.std(x)))
-# print("The generated data has shape: " + str(x.shape))
-# print("Train generator batches: " + str(train_generator.__len__()));
 # ----------------------------- Test Data -------------------------------------
 
-test_generator = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=40)
-x_test, y_test = test_generator.__getitem__(1);
-print("The generated test data has mean: " + str(x_test.mean()))
-print("The generated test data has std: " + str(np.std(x_test)))
-print("The generated test data has shape: " + str(x_test.shape))
-print("Test generator batches: " + str(test_generator.__len__()));
-
-
-y_pred = model.predict(x_test)
-
-print("Predictions")
-print(y_pred)
-print("Actuals")
-print(y_test)
+# test_generator = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=40)
+# x_test, y_test = test_generator.__getitem__(1);
+# print("The generated test data has mean: " + str(x_test.mean()))
+# print("The generated test data has std: " + str(np.std(x_test)))
+# print("The generated test data has shape: " + str(x_test.shape))
+# print("Test generator batches: " + str(test_generator.__len__()));
+#
+#
+# y_pred = model.predict(x_test)
+#
+# print("Predictions")
+# print(y_pred)
+# print("Actuals")
+# print(y_test)
 

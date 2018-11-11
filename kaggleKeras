@@ -1,5 +1,0 @@
-#!/bin/bash
-docker container stop ruff
-docker container rm ruff
-docker image build -t edc $(pwd)/keras/
-docker run -it --name ruff -v $(pwd):/ralston edc
