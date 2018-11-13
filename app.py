@@ -18,12 +18,14 @@ import tensorflow as tf
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+import datetime
+
 os.chdir("/ralston")
 print(os.listdir("."))
 
 # -----------------------Initialize train labels, label names----------------------------
 
-train_labels = pd.read_csv("train.csv", nrows=140)
+train_labels = pd.read_csv("train.csv")
 labels = {
     0:  "Nucleoplasm",
     1:  "Nuclear membrane",
@@ -140,11 +142,14 @@ categories = 2;
 
 lrs = [math.pow(10, i) for i in range(-2, 1, 1)]
 momentums = [.1, .9]
+lr = [.01]
+momentums = [.1]
+now = datetime.datetime.now()
 
 print(lrs)
 print(momentums)
-f = open("records.txt", "w")
-csvfile = open('eggs.csv', 'w', newline='')
+
+csvfile = open(str(now.day)+str(now.hour) + str(now.min) + 'eggs.csv', 'w', newline='')
 head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
 spamwriter = csv.writer(csvfile, delimiter=';',
                         quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -156,46 +161,40 @@ for lr in lrs:
         # input: 100x100 images with 3 channels -> (100, 100, 3) tensors.
         # this applies 32 convolution filters of size 3x3 each.
         model.add(Conv2D(100, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
-        # model.add(Conv2D(32, (3, 3), activation='relu'))
         model.add(MaxPooling2D(pool_size=(5, 5)))
         model.add(Dropout(0.25))
-        # model.add(Conv2D(64, (3, 3), activation='relu'))
-        # model.add(Conv2D(64, (3, 3), activation='relu'))
-        # model.add(MaxPooling2D(pool_size=(2, 2)))
-        # model.add(Dropout(0.25))
         model.add(Flatten())
         model.add(BatchNormalization(axis=1))
-        # model.add(Dense(256, activation='relu'))
-        # model.add(Dropout(0.5))
+
         model.add(Dense(categories, activation='softmax'))
         sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
         model.compile(loss='categorical_crossentropy', optimizer=sgd)
 
-        # with open("model.json", "w") as json_file:
-        #     json_model = model.to_json()
-        #     json_file.write(json_model)
-        # model.save('weights')
-
-        # with open("model.json", "r") as json_file:
-        #     json_model = json_file.read()
-        #     model = model_from_json(json_model)
-        # model.load_weights('weights')
-
         # ------------------------ Fit the Model -------------------------------
-
-        train_history = model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=2),
-                            steps_per_epoch = 100,
+        print("Number of samples available: " + str(len(train_labels)))
+        train_history = model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:28], batch_size=2),
+                            steps_per_epoch = 14,
                             epochs = 5,
-                            validation_data = CIFAR10Sequence(train_labels=train_labels[100:130], batch_size=1),
-                            validation_steps = 30)
+                            validation_data = CIFAR10Sequence(train_labels=train_labels[28:31], batch_size=1),
+                            validation_steps = 3)
 
         # -----------------------record the results---------------------------
-
         losses = train_history.history['loss']
         val_losses = train_history.history['val_loss']
         spamwriter.writerow(["train", lr, m] + losses)
         spamwriter.writerow(["valid", lr, m] + val_losses)
-f.close()
+csvfile.close()
+
+with open("models/model.json", "w") as json_file:
+    json_model = model.to_json()
+    json_file.write(json_model)
+model.save('modelWeights/weights')
+
+# with open("models/model.json", "r") as json_file:
+#     json_model = json_file.read()
+#     model = model_from_json(json_model)
+# model.load_weights('modelWeights/weights')
+
 
 # ----------------------------- Test Data -------------------------------------
 
