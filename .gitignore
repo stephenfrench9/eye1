@@ -1,0 +1,11 @@
+test/*
+train/*
+
+/mnist
+poorlyTrained
+*idea*
+*kaggle.json*
+*jpg
+*eggs*
+/modelWeights/*
+/models/*
