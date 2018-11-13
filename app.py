@@ -1,3 +1,4 @@
+import csv
 import os
 import math
 from keras.models import Sequential, model_from_json
@@ -143,6 +144,11 @@ momentums = [.1, .9]
 print(lrs)
 print(momentums)
 f = open("records.txt", "w")
+csvfile = open('eggs.csv', 'w', newline='')
+head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
+spamwriter = csv.writer(csvfile, delimiter=';',
+                        quotechar='"', quoting=csv.QUOTE_MINIMAL)
+spamwriter.writerow(head)
 for lr in lrs:
     for m in momentums:
         print("-------" + str(lr) + " : " + str(m) + "--------")
@@ -177,20 +183,18 @@ for lr in lrs:
 
         # ------------------------ Fit the Model -------------------------------
 
-        train_history = model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=100),
+        train_history = model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:100], batch_size=2),
                             steps_per_epoch = 100,
-                            epochs = 3,
-                            validation_data = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=40),
-                            validation_steps = 40)
+                            epochs = 5,
+                            validation_data = CIFAR10Sequence(train_labels=train_labels[100:130], batch_size=1),
+                            validation_steps = 30)
 
         # -----------------------record the results---------------------------
 
         losses = train_history.history['loss']
         val_losses = train_history.history['val_loss']
-
-        f.write("-------" + str(lr) + " : " + str(m) + "--------\n")
-        f.write("losses: " + str([round(l, 3) for l in losses]) + " \n")
-        f.write("val_losses: " + str([round(v, 3) for v in val_losses]) + " \n\n")
+        spamwriter.writerow(["train", lr, m] + losses)
+        spamwriter.writerow(["valid", lr, m] + val_losses)
 f.close()
 
 # ----------------------------- Test Data -------------------------------------
