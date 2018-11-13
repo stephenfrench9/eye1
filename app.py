@@ -140,76 +140,76 @@ ax0range=10; ax1range=100; ax2range=100; ax3range=4;
 categories = 2;
 
 
-lrs = [math.pow(10, i) for i in range(-2, 1, 1)]
-momentums = [.1, .9]
-lr = [.01]
-momentums = [.1]
-now = datetime.datetime.now()
-
-print(lrs)
-print(momentums)
-
-csvfile = open(str(now.day)+str(now.hour) + str(now.min) + 'eggs.csv', 'w', newline='')
-head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
-spamwriter = csv.writer(csvfile, delimiter=';',
-                        quotechar='"', quoting=csv.QUOTE_MINIMAL)
-spamwriter.writerow(head)
-for lr in lrs:
-    for m in momentums:
-        print("-------" + str(lr) + " : " + str(m) + "--------")
-        model = Sequential()
-        # input: 100x100 images with 3 channels -> (100, 100, 3) tensors.
-        # this applies 32 convolution filters of size 3x3 each.
-        model.add(Conv2D(100, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
-        model.add(MaxPooling2D(pool_size=(5, 5)))
-        model.add(Dropout(0.25))
-        model.add(Flatten())
-        model.add(BatchNormalization(axis=1))
-
-        model.add(Dense(categories, activation='softmax'))
-        sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
-        model.compile(loss='categorical_crossentropy', optimizer=sgd)
-
-        # ------------------------ Fit the Model -------------------------------
-        print("Number of samples available: " + str(len(train_labels)))
-        train_history = model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:28], batch_size=2),
-                            steps_per_epoch = 14,
-                            epochs = 5,
-                            validation_data = CIFAR10Sequence(train_labels=train_labels[28:31], batch_size=1),
-                            validation_steps = 3)
-
-        # -----------------------record the results---------------------------
-        losses = train_history.history['loss']
-        val_losses = train_history.history['val_loss']
-        spamwriter.writerow(["train", lr, m] + losses)
-        spamwriter.writerow(["valid", lr, m] + val_losses)
-csvfile.close()
-
-with open("models/model.json", "w") as json_file:
-    json_model = model.to_json()
-    json_file.write(json_model)
-model.save('modelWeights/weights')
-
-# with open("models/model.json", "r") as json_file:
-#     json_model = json_file.read()
-#     model = model_from_json(json_model)
-# model.load_weights('modelWeights/weights')
-
-
-# ----------------------------- Test Data -------------------------------------
-
-# test_generator = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=40)
-# x_test, y_test = test_generator.__getitem__(1);
-# print("The generated test data has mean: " + str(x_test.mean()))
-# print("The generated test data has std: " + str(np.std(x_test)))
-# print("The generated test data has shape: " + str(x_test.shape))
-# print("Test generator batches: " + str(test_generator.__len__()));
+# lrs = [math.pow(10, i) for i in range(-2, 1, 1)]
+# momentums = [.1, .9]
+# lrs = [.01]
+# momentums = [.1]
+# now = datetime.datetime.now()
 #
+# print(lrs)
+# print(momentums)
 #
-# y_pred = model.predict(x_test)
+# csvfile = open(str(now.day)+str(now.hour) + str(now.min) + 'eggs.csv', 'w', newline='')
+# head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
+# spamwriter = csv.writer(csvfile, delimiter=';',
+#                         quotechar='"', quoting=csv.QUOTE_MINIMAL)
+# spamwriter.writerow(head)
+# for lr in lrs:
+#     for m in momentums:
+#         print("-------" + str(lr) + " : " + str(m) + "--------")
+#         model = Sequential()
+#         # input: 100x100 images with 3 channels -> (100, 100, 3) tensors.
+#         # this applies 32 convolution filters of size 3x3 each.
+#         model.add(Conv2D(100, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
+#         model.add(MaxPooling2D(pool_size=(5, 5)))
+#         model.add(Dropout(0.25))
+#         model.add(Flatten())
+#         model.add(BatchNormalization(axis=1))
 #
-# print("Predictions")
-# print(y_pred)
-# print("Actuals")
-# print(y_test)
+#         model.add(Dense(categories, activation='softmax'))
+#         sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
+#         model.compile(loss='categorical_crossentropy', optimizer=sgd)
+#
+#         # ------------------------ Fit the Model -------------------------------
+#         print("Number of samples available: " + str(len(train_labels)))
+#         train_history = model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:28], batch_size=2),
+#                             steps_per_epoch = 14,
+#                             epochs = 5,
+#                             validation_data = CIFAR10Sequence(train_labels=train_labels[28:31], batch_size=1),
+#                             validation_steps = 3)
+#
+#         # -----------------------record the results---------------------------
+#         losses = train_history.history['loss']
+#         val_losses = train_history.history['val_loss']
+#         spamwriter.writerow(["train", lr, m] + losses)
+#         spamwriter.writerow(["valid", lr, m] + val_losses)
+# csvfile.close()
+#
+# with open("models/model.json", "w") as json_file:
+#     json_model = model.to_json()
+#     json_file.write(json_model)
+# model.save('modelWeights/weights')
+
+with open("models/model.json", "r") as json_file:
+    json_model = json_file.read()
+    model = model_from_json(json_model)
+model.load_weights('modelWeights/weights')
+
+
+----------------------------- Test Data -------------------------------------
+
+test_generator = CIFAR10Sequence(train_labels=train_labels[100:140], batch_size=40)
+x_test, y_test = test_generator.__getitem__(1);
+print("The generated test data has mean: " + str(x_test.mean()))
+print("The generated test data has std: " + str(np.std(x_test)))
+print("The generated test data has shape: " + str(x_test.shape))
+print("Test generator batches: " + str(test_generator.__len__()));
+
+
+y_pred = model.predict(x_test)
+
+print("Predictions")
+print(y_pred)
+print("Actuals")
+print(y_test)
 
