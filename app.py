@@ -3,6 +3,7 @@ import datetime
 import keras
 import os
 import math
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import warnings
@@ -67,7 +68,7 @@ def data():
     return train_labels
 
 
-class CIFAR10Sequence(Sequence):
+class ImageSequence(Sequence):
 
     def __init__(self, train_labels, batch_size, start):
         self.train_labels = train_labels
@@ -144,10 +145,19 @@ class CIFAR10Sequence(Sequence):
         y = y.reshape(self.batch_size, 1)
         y = keras.utils.to_categorical(y, num_classes=2)
 
+        max = np.max(x)
+        max = abs(max)
+        x /= max
+        mean = np.mean(x)
+        x -= mean
+
+        o = x.shape
+        x = x.reshape(o[0], o[1] * o[2] * o[3])
+
         return x, y
 
 
-def model(lrp, mp):
+def model0(lrp, mp):
     ax0range = 10;
     ax1range = 100;
     ax2range = 100;
@@ -160,6 +170,19 @@ def model(lrp, mp):
     model.add(Dropout(0.25))
     model.add(Flatten())
     model.add(BatchNormalization(axis=1))
+    model.add(Dense(categories, activation='softmax'))
+    sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd)
+    return model
+
+
+def model1(lrp, mp):
+    ax0range = 10;
+    ax1range = 40000;
+    categories = 2;
+
+    model = Sequential()
+    model.add(Dense(2000, activation='relu', input_dim=40000))
     model.add(Dense(categories, activation='softmax'))
     sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd)
@@ -180,7 +203,7 @@ def load_and_predict(train_labels, start):
     model.load_weights('modelWeights/weights')
 
     # load test data
-    test_generator = CIFAR10Sequence(train_labels=train_labels, batch_size=40, start=start)
+    test_generator = ImageSequence(train_labels=train_labels, batch_size=40, start=start)
     x_test, y_test = test_generator.__getitem__(0);
     print("The generated test data has mean: " + str(x_test.mean()))
     print("The generated test data has std: " + str(np.std(x_test)))
@@ -192,6 +215,37 @@ def load_and_predict(train_labels, start):
     print(y_pred)
 
 
+def search_parameters(lrs, momentums):
+    now = datetime.datetime.now()
+    csvfile = open(str(now) + 'eggs.csv', 'w', newline='')
+    head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
+    spamwriter = csv.writer(csvfile, delimiter=';',
+                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    spamwriter.writerow(head)
+    for lr in lrs:
+        for m in momentums:
+            model = model0(lr, m)
+            # ------------------------ Fit the Model -------------------------------
+            print("Number of samples available: " + str(len(train_labels)))
+            train_history = model.fit_generator(
+                generator=ImageSequence(train_labels=train_labels[0:28], batch_size=2, start=0),
+                steps_per_epoch=14,
+                epochs=5,
+                validation_data=ImageSequence(train_labels=train_labels[28:31], batch_size=1, start=28),
+                validation_steps=3)
+
+            # -----------------------record the results---------------------------
+            losses = train_history.history['loss']
+            val_losses = train_history.history['val_loss']
+            spamwriter.writerow(["train", lr, m] + losses)
+            spamwriter.writerow(["valid", lr, m] + val_losses)
+    csvfile.close()
+    # with open("models/model.json", "w") as json_file:
+    #     json_model = model.to_json()
+    #     json_file.write(json_model)
+    # model.save('modelWeights/weights')
+
+
 if __name__=="__main__":
     print("this is the main activity")
     os.chdir("/ralston")
@@ -201,38 +255,28 @@ if __name__=="__main__":
     train_labels = data()
 
     # parameter search
-    lrs = [math.pow(10, i) for i in range(0, 1, 1)]
-    momentums = [.1]
-    now = datetime.datetime.now()
+    # lrs = [math.pow(10, i) for i in range(0, 1, 1)]
+    # momentums = [.1]
+    # search_parameters(lrs, momentums)
 
-    csvfile = open(str(now) + 'eggs.csv', 'w', newline='')
-    head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
-    spamwriter = csv.writer(csvfile, delimiter=';',
-                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    spamwriter.writerow(head)
-    for lr in lrs:
-        for m in momentums:
-            model = model(lr, m)
-            # ------------------------ Fit the Model -------------------------------
-            print("Number of samples available: " + str(len(train_labels)))
-            train_history = model.fit_generator(
-                generator=CIFAR10Sequence(train_labels=train_labels[0:28], batch_size=2, start=0),
-                steps_per_epoch=14,
-                epochs=5,
-                validation_data=CIFAR10Sequence(train_labels=train_labels[28:31], batch_size=1, start=28),
-                validation_steps=3)
+    model = model1(.1, .1)
 
-            # -----------------------record the results---------------------------
-            losses = train_history.history['loss']
-            val_losses = train_history.history['val_loss']
-            spamwriter.writerow(["train", lr, m] + losses)
-            spamwriter.writerow(["valid", lr, m] + val_losses)
-    csvfile.close()
+    model.fit_generator(generator=ImageSequence(train_labels[0:28000], batch_size=10, start=0),
+                        steps_per_epoch=2800,
+                        epochs=7,
+                        validation_data=ImageSequence(train_labels[28000:31000], batch_size=10, start=28000),
+                        validation_steps=300)
 
-    # with open("models/model.json", "w") as json_file:
-    #     json_model = model.to_json()
-    #     json_file.write(json_model)
-    # model.save('modelWeights/weights')
+    test_generator = ImageSequence(train_labels=train_labels[0:50], batch_size=40, start=0)
+    x_test, y_test = test_generator.__getitem__(0);
+    y_pred = model.predict(x_test)
+    print(y_pred)
+    with open("models/model.json", "w") as json_file:
+        json_model = model.to_json()
+        json_file.write(json_model)
+    model.save('modelWeights/weights')
 
-    # # load model
+
+
+    # load model
     # load_and_predict(train_labels[40:120], 40)

@@ -9,3 +9,5 @@ poorlyTrained
 *eggs*
 /modelWeights/*
 /models/*
+/pictures
+*DS_S*
