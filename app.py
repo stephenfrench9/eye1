@@ -189,6 +189,19 @@ def model1(lrp, mp):
     return model
 
 
+def model2(lrp, mp):
+    ax0range = 10;
+    ax1range = 40000;
+    categories = 2;
+
+    model = Sequential()
+    model.add(Dense(1000, activation='relu', input_dim=40000))
+    model.add(Dense(categories, activation='softmax'))
+    sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd)
+    return model
+
+
 def load_and_predict(train_labels, start):
     """
     :param train_labels: loads the model that is in models/ and the
@@ -259,11 +272,11 @@ if __name__=="__main__":
     # momentums = [.1]
     # search_parameters(lrs, momentums)
 
-    model = model1(.1, .1)
+    model = model2(.1, .1)
 
     model.fit_generator(generator=ImageSequence(train_labels[0:28000], batch_size=10, start=0),
                         steps_per_epoch=2800,
-                        epochs=7,
+                        epochs=15,
                         validation_data=ImageSequence(train_labels[28000:31000], batch_size=10, start=28000),
                         validation_steps=300)
 
@@ -271,10 +284,10 @@ if __name__=="__main__":
     x_test, y_test = test_generator.__getitem__(0);
     y_pred = np.round(model.predict(x_test), 2)
     print(y_pred)
-    with open("models/model.json", "w") as json_file:
+    with open("models/model2.json", "w") as json_file:
         json_model = model.to_json()
         json_file.write(json_model)
-    model.save('modelWeights/weights')
+    model.save('modelWeights/weights2')
 
 
 
