@@ -1,35 +1,20 @@
 import csv
+import datetime
+import keras
 import os
 import math
+import numpy as np
+import pandas as pd
+import warnings
+
 from keras.models import Sequential, model_from_json
-from os import listdir
-import keras
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
 from keras.optimizers import SGD
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
-import seaborn as sns
-import matplotlib.pyplot as plt
-from PIL import Image
 from scipy.misc import imread
-from scipy.misc import imshow
-import tensorflow as tf
-import warnings
-
 from skimage.io import imread
-from skimage.transform import resize
-import numpy as np
 from keras.utils import Sequence
-
-
-
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-
-import datetime
-
-
-# -----------------------Initialize train labels, label names----------------------------
 
 
 def data():
@@ -81,12 +66,6 @@ def data():
 
     return train_labels
 
-# ---------------------- Read using keras.utils.Sequence --------------------------
-
-
-
-# Here, `x_set` is list of path to the images
-# and `y_set` are the associated classes.
 
 class CIFAR10Sequence(Sequence):
 
@@ -138,11 +117,10 @@ class CIFAR10Sequence(Sequence):
         y = np.ones(self.batch_size)
         x = np.ones((1, 512, 512, 4))
 
-
-
         # x = np.ones((1, 512, 512))
         for i in range(self.batch_size):
             sample = self.start + i + idx * self.batch_size
+            print("START" + str(sample))
             b = imread(self.base + self.train_labels.at[sample, 'Id'] + self.red).reshape((512, 512, 1))
             b = b / np.std(b)
             b = b - b.mean()
@@ -169,81 +147,91 @@ class CIFAR10Sequence(Sequence):
 
         return x, y
 
-# ------------------------- Define Model -----------------------------
-# ax0range=10; ax1range=100; ax2range=100; ax3range=4;
-# categories = 2;
-#
-#
-# lrs = [math.pow(10, i) for i in range(-2, 1, 1)]
-# momentums = [.1, .9]
-# lrs = [.01]
-# momentums = [.1]
-# now = datetime.datetime.now()
-#
-# print(lrs)
-# print(momentums)
-#
-# csvfile = open(str(now.day)+str(now.hour) + str(now.min) + 'eggs.csv', 'w', newline='')
-# head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
-# spamwriter = csv.writer(csvfile, delimiter=';',
-#                         quotechar='"', quoting=csv.QUOTE_MINIMAL)
-# spamwriter.writerow(head)
-# for lr in lrs:
-#     for m in momentums:
-#         print("-------" + str(lr) + " : " + str(m) + "--------")
-#         model = Sequential()
-#         # input: 100x100 images with 3 channels -> (100, 100, 3) tensors.
-#         # this applies 32 convolution filters of size 3x3 each.
-#         model.add(Conv2D(100, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
-#         model.add(MaxPooling2D(pool_size=(5, 5)))
-#         model.add(Dropout(0.25))
-#         model.add(Flatten())
-#         model.add(BatchNormalization(axis=1))
-#
-#         model.add(Dense(categories, activation='softmax'))
-#         sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
-#         model.compile(loss='categorical_crossentropy', optimizer=sgd)
-#
-#         # ------------------------ Fit the Model -------------------------------
-#         print("Number of samples available: " + str(len(train_labels)))
-#         train_history = model.fit_generator(generator = CIFAR10Sequence(train_labels=train_labels[0:28000], batch_size=2),
-#                             steps_per_epoch = 14000,
-#                             epochs = 5,
-#                             validation_data = CIFAR10Sequence(train_labels=train_labels[28000:31000], batch_size=1),
-#                             validation_steps = 3000)
-#
-#         # -----------------------record the results---------------------------
-#         losses = train_history.history['loss']
-#         val_losses = train_history.history['val_loss']
-#         spamwriter.writerow(["train", lr, m] + losses)
-#         spamwriter.writerow(["valid", lr, m] + val_losses)
-# csvfile.close()
-#
-# with open("models/model.json", "w") as json_file:
-#     json_model = model.to_json()
-#     json_file.write(json_model)
-# model.save('modelWeights/weights')
+
+def model(lrp, mp):
+    ax0range = 10;
+    ax1range = 100;
+    ax2range = 100;
+    ax3range = 4;
+    categories = 2;
+
+    model = Sequential()
+    model.add(Conv2D(100, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
+    model.add(MaxPooling2D(pool_size=(5, 5)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(BatchNormalization(axis=1))
+    model.add(Dense(categories, activation='softmax'))
+    sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd)
+    return model
 
 
-# ----------------------------- Test uh model -------------------------------------
+def load_and_predict(train_labels, start):
+    """
+    :param train_labels: loads the model that is in models/ and the
+    weights from modelWeights/, and the training datas that you pass into it.
+    :return:
+    """
+    with open("models/model.json", "r") as json_file:
+        json_model = json_file.read()
+        model = model_from_json(json_model)
+    model.load_weights('modelWeights/weights')
+
+    # load test data
+    test_generator = CIFAR10Sequence(train_labels=train_labels, batch_size=40, start=start)
+    x_test, y_test = test_generator.__getitem__(0);
+    print("The generated test data has mean: " + str(x_test.mean()))
+    print("The generated test data has std: " + str(np.std(x_test)))
+    print("The generated test data has shape: " + str(x_test.shape))
+    print("Test generator batches: " + str(test_generator.__len__()));
+
+    y_pred = model.predict(x_test)
+
+    print(y_pred)
+
 
 if __name__=="__main__":
     print("this is the main activity")
     os.chdir("/ralston")
     print(os.listdir("."))
 
+    # load the data
     train_labels = data()
 
-    # # load model
-    # with open("models/model.json", "r") as json_file:
-    #     json_model = json_file.read()
-    #     model = model_from_json(json_model)
-    # model.load_weights('modelWeights/weights')
+    # # parameter search
+    # lrs = [math.pow(10, i) for i in range(-2, 1, 1)]
+    # momentums = [.1, .9]
+    # now = datetime.datetime.now()
+    #
+    # csvfile = open(str(now.day) + str(now.hour) + str(now.min) + 'eggs.csv', 'w', newline='')
+    # head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
+    # spamwriter = csv.writer(csvfile, delimiter=';',
+    #                         quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    # spamwriter.writerow(head)
+    # for lr in lrs:
+    #     for m in momentums:
+    #         model = model(lr, m)
+    #         # ------------------------ Fit the Model -------------------------------
+    #         print("Number of samples available: " + str(len(train_labels)))
+    #         train_history = model.fit_generator(
+    #             generator=CIFAR10Sequence(train_labels=train_labels[0:28000], batch_size=2),
+    #             steps_per_epoch=14000,
+    #             epochs=5,
+    #             validation_data=CIFAR10Sequence(train_labels=train_labels[28000:31000], batch_size=1),
+    #             validation_steps=3000)
+    #
+    #         # -----------------------record the results---------------------------
+    #         losses = train_history.history['loss']
+    #         val_losses = train_history.history['val_loss']
+    #         spamwriter.writerow(["train", lr, m] + losses)
+    #         spamwriter.writerow(["valid", lr, m] + val_losses)
+    # csvfile.close()
 
-    # load test data
-    test_generator = CIFAR10Sequence(train_labels=train_labels, batch_size=40, start=0)
-    x_test, y_test = test_generator.__getitem__(1);
-    print("The generated test data has mean: " + str(x_test.mean()))
-    print("The generated test data has std: " + str(np.std(x_test)))
-    print("The generated test data has shape: " + str(x_test.shape))
-    print("Test generator batches: " + str(test_generator.__len__()));
+    # with open("models/model.json", "w") as json_file:
+    #     json_model = model.to_json()
+    #     json_file.write(json_model)
+    # model.save('modelWeights/weights')
+
+    # # load model
+    # load_and_predict(train_labels[40:120], 40)
