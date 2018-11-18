@@ -7,13 +7,13 @@ import numpy as np
 import pandas as pd
 import warnings
 
-from keras.models import Sequential, model_from_json
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
+from keras.models import Sequential, model_from_json
 from keras.optimizers import SGD
+from keras.utils import Sequence
 from scipy.misc import imread
 from skimage.io import imread
-from keras.utils import Sequence
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
@@ -120,7 +120,6 @@ class CIFAR10Sequence(Sequence):
         # x = np.ones((1, 512, 512))
         for i in range(self.batch_size):
             sample = self.start + i + idx * self.batch_size
-            print("START" + str(sample))
             b = imread(self.base + self.train_labels.at[sample, 'Id'] + self.red).reshape((512, 512, 1))
             b = b / np.std(b)
             b = b - b.mean()
@@ -171,6 +170,8 @@ def load_and_predict(train_labels, start):
     """
     :param train_labels: loads the model that is in models/ and the
     weights from modelWeights/, and the training datas that you pass into it.
+    :param start: an index in the original train labels. Tells you the first row
+    present in this data set
     :return:
     """
     with open("models/model.json", "r") as json_file:
@@ -199,34 +200,34 @@ if __name__=="__main__":
     # load the data
     train_labels = data()
 
-    # # parameter search
-    # lrs = [math.pow(10, i) for i in range(-2, 1, 1)]
-    # momentums = [.1, .9]
-    # now = datetime.datetime.now()
-    #
-    # csvfile = open(str(now.day) + str(now.hour) + str(now.min) + 'eggs.csv', 'w', newline='')
-    # head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
-    # spamwriter = csv.writer(csvfile, delimiter=';',
-    #                         quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    # spamwriter.writerow(head)
-    # for lr in lrs:
-    #     for m in momentums:
-    #         model = model(lr, m)
-    #         # ------------------------ Fit the Model -------------------------------
-    #         print("Number of samples available: " + str(len(train_labels)))
-    #         train_history = model.fit_generator(
-    #             generator=CIFAR10Sequence(train_labels=train_labels[0:28000], batch_size=2),
-    #             steps_per_epoch=14000,
-    #             epochs=5,
-    #             validation_data=CIFAR10Sequence(train_labels=train_labels[28000:31000], batch_size=1),
-    #             validation_steps=3000)
-    #
-    #         # -----------------------record the results---------------------------
-    #         losses = train_history.history['loss']
-    #         val_losses = train_history.history['val_loss']
-    #         spamwriter.writerow(["train", lr, m] + losses)
-    #         spamwriter.writerow(["valid", lr, m] + val_losses)
-    # csvfile.close()
+    # parameter search
+    lrs = [math.pow(10, i) for i in range(0, 1, 1)]
+    momentums = [.1]
+    now = datetime.datetime.now()
+
+    csvfile = open(str(now) + 'eggs.csv', 'w', newline='')
+    head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
+    spamwriter = csv.writer(csvfile, delimiter=';',
+                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    spamwriter.writerow(head)
+    for lr in lrs:
+        for m in momentums:
+            model = model(lr, m)
+            # ------------------------ Fit the Model -------------------------------
+            print("Number of samples available: " + str(len(train_labels)))
+            train_history = model.fit_generator(
+                generator=CIFAR10Sequence(train_labels=train_labels[0:28], batch_size=2, start=0),
+                steps_per_epoch=14,
+                epochs=5,
+                validation_data=CIFAR10Sequence(train_labels=train_labels[28:31], batch_size=1, start=28),
+                validation_steps=3)
+
+            # -----------------------record the results---------------------------
+            losses = train_history.history['loss']
+            val_losses = train_history.history['val_loss']
+            spamwriter.writerow(["train", lr, m] + losses)
+            spamwriter.writerow(["valid", lr, m] + val_losses)
+    csvfile.close()
 
     # with open("models/model.json", "w") as json_file:
     #     json_model = model.to_json()
