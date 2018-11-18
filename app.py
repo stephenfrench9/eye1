@@ -269,7 +269,7 @@ if __name__=="__main__":
 
     test_generator = ImageSequence(train_labels=train_labels[0:50], batch_size=40, start=0)
     x_test, y_test = test_generator.__getitem__(0);
-    y_pred = model.predict(x_test)
+    y_pred = np.round(model.predict(x_test), 2)
     print(y_pred)
     with open("models/model.json", "w") as json_file:
         json_model = model.to_json()
