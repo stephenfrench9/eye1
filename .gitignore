@@ -11,3 +11,5 @@ poorlyTrained
 /models/*
 /pictures
 *DS_S*
+
+*__pycache__*

@@ -15,43 +15,46 @@ from keras.optimizers import SGD
 from keras.utils import Sequence
 from scipy.misc import imread
 from skimage.io import imread
+
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+
+root = "/ralston/"
 
 
 def data():
-    train_labels = pd.read_csv("train.csv")
+    train_labels = pd.read_csv(root + "train.csv")
     labels = {
-        0:  "Nucleoplasm",
-        1:  "Nuclear membrane",
-        2:  "Nucleoli",
-        3:  "Nucleoli fibrillar center",
-        4:  "Nuclear speckles",
-        5:  "Nuclear bodies",
-        6:  "Endoplasmic reticulum",
-        7:  "Golgi apparatus",
-        8:  "Peroxisomes",
-        9:  "Endosomes",
-        10:  "Lysosomes",
-        11:  "Intermediate filaments",
-        12:  "Actin filaments",
-        13:  "Focal adhesion sites",
-        14:  "Microtubules",
-        15:  "Microtubule ends",
-        16:  "Cytokinetic bridge",
-        17:  "Mitotic spindle",
-        18:  "Microtubule organizing center",
-        19:  "Centrosome",
-        20:  "Lipid droplets",
-        21:  "Plasma membrane",
-        22:  "Cell junctions",
-        23:  "Mitochondria",
-        24:  "Aggresome",
-        25:  "Cytosol",
-        26:  "Cytoplasmic bodies",
-        27:  "Rods & rings"
+        0: "Nucleoplasm",
+        1: "Nuclear membrane",
+        2: "Nucleoli",
+        3: "Nucleoli fibrillar center",
+        4: "Nuclear speckles",
+        5: "Nuclear bodies",
+        6: "Endoplasmic reticulum",
+        7: "Golgi apparatus",
+        8: "Peroxisomes",
+        9: "Endosomes",
+        10: "Lysosomes",
+        11: "Intermediate filaments",
+        12: "Actin filaments",
+        13: "Focal adhesion sites",
+        14: "Microtubules",
+        15: "Microtubule ends",
+        16: "Cytokinetic bridge",
+        17: "Mitotic spindle",
+        18: "Microtubule organizing center",
+        19: "Centrosome",
+        20: "Lipid droplets",
+        21: "Plasma membrane",
+        22: "Cell junctions",
+        23: "Mitochondria",
+        24: "Aggresome",
+        25: "Cytosol",
+        26: "Cytoplasmic bodies",
+        27: "Rods & rings"
     }
 
-    reverse_train_labels = dict((v,k) for k,v in labels.items())
+    reverse_train_labels = dict((v, k) for k, v in labels.items())
 
     for key in labels.keys():
         train_labels[labels[key]] = 0
@@ -80,34 +83,34 @@ class ImageSequence(Sequence):
         self.green = "_green.png"
         self.start = start
         self.labels = {
-            0:  "Nucleoplasm",
-            1:  "Nuclear membrane",
-            2:  "Nucleoli",
-            3:  "Nucleoli fibrillar center",
-            4:  "Nuclear speckles",
-            5:  "Nuclear bodies",
-            6:  "Endoplasmic reticulum",
-            7:  "Golgi apparatus",
-            8:  "Peroxisomes",
-            9:  "Endosomes",
-            10:  "Lysosomes",
-            11:  "Intermediate filaments",
-            12:  "Actin filaments",
-            13:  "Focal adhesion sites",
-            14:  "Microtubules",
-            15:  "Microtubule ends",
-            16:  "Cytokinetic bridge",
-            17:  "Mitotic spindle",
-            18:  "Microtubule organizing center",
-            19:  "Centrosome",
-            20:  "Lipid droplets",
-            21:  "Plasma membrane",
-            22:  "Cell junctions",
-            23:  "Mitochondria",
-            24:  "Aggresome",
-            25:  "Cytosol",
-            26:  "Cytoplasmic bodies",
-            27:  "Rods & rings"
+            0: "Nucleoplasm",
+            1: "Nuclear membrane",
+            2: "Nucleoli",
+            3: "Nucleoli fibrillar center",
+            4: "Nuclear speckles",
+            5: "Nuclear bodies",
+            6: "Endoplasmic reticulum",
+            7: "Golgi apparatus",
+            8: "Peroxisomes",
+            9: "Endosomes",
+            10: "Lysosomes",
+            11: "Intermediate filaments",
+            12: "Actin filaments",
+            13: "Focal adhesion sites",
+            14: "Microtubules",
+            15: "Microtubule ends",
+            16: "Cytokinetic bridge",
+            17: "Mitotic spindle",
+            18: "Microtubule organizing center",
+            19: "Centrosome",
+            20: "Lipid droplets",
+            21: "Plasma membrane",
+            22: "Cell junctions",
+            23: "Mitochondria",
+            24: "Aggresome",
+            25: "Cytosol",
+            26: "Cytoplasmic bodies",
+            27: "Rods & rings"
         }
 
     def __len__(self):
@@ -140,7 +143,6 @@ class ImageSequence(Sequence):
             y[i] = self.train_labels.at[sample, self.labels.get(0)]
 
         x = x[1:, 100:200, 100:200, :]
-
 
         y = y.reshape(self.batch_size, 1)
         y = keras.utils.to_categorical(y, num_classes=2)
@@ -202,7 +204,7 @@ def model2(lrp, mp):
     return model
 
 
-def load_and_predict(train_labels, start):
+def load_and_predict(model, train_labels, start):
     """
     :param train_labels: loads the model that is in models/ and the
     weights from modelWeights/, and the training datas that you pass into it.
@@ -210,10 +212,11 @@ def load_and_predict(train_labels, start):
     present in this data set
     :return:
     """
-    with open("models/model.json", "r") as json_file:
+    destination = root + "models/" + model
+    with open(destination + "model.json", "r") as json_file:
         json_model = json_file.read()
         model = model_from_json(json_model)
-    model.load_weights('modelWeights/weights')
+    model.load_weights(destination + 'weights')
 
     # load test data
     test_generator = ImageSequence(train_labels=train_labels, batch_size=40, start=start)
@@ -222,15 +225,17 @@ def load_and_predict(train_labels, start):
     print("The generated test data has std: " + str(np.std(x_test)))
     print("The generated test data has shape: " + str(x_test.shape))
     print("Test generator batches: " + str(test_generator.__len__()));
-
     y_pred = model.predict(x_test)
 
     print(y_pred)
+    return y_pred
 
 
 def search_parameters(lrs, momentums):
     now = datetime.datetime.now()
-    csvfile = open(str(now) + 'eggs.csv', 'w', newline='')
+    modelID = str(now.day) + str(now.hour) + str(now.min) + str(now.second)
+    destination = root + "models/" + modelID + "/"
+    csvfile = open(destination + 'eggs.csv', 'w', newline='')
     head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
     spamwriter = csv.writer(csvfile, delimiter=';',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -259,11 +264,17 @@ def search_parameters(lrs, momentums):
     # model.save('modelWeights/weights')
 
 
-if __name__=="__main__":
-    print("this is the main activity")
-    os.chdir("/ralston")
-    print(os.listdir("."))
+def writeCsv(csvfile, lr, p, batch_size, train_history):
+    head = ['type', 'learning rate', 'momentum', 'batch size','epoch 1', 'epoch 2', ' ... ']
+    spamwriter = csv.writer(csvfile, delimiter=';',
+                            quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    spamwriter.writerow(head)
+    losses = train_history.history['loss']
+    val_losses = train_history.history['val_loss']
+    spamwriter.writerow(["train", lr, p, batch_size] + losses)
+    spamwriter.writerow(["valid", lr, p, batch_size] + val_losses)
 
+if __name__ == "__main__":
     # load the data
     train_labels = data()
 
@@ -272,24 +283,38 @@ if __name__=="__main__":
     # momentums = [.1]
     # search_parameters(lrs, momentums)
 
-    model = model2(.1, .1)
+    lr = .1;
+    p = .1;
+    batch_size = 1;
+    model = model2(lr, p)
 
-    model.fit_generator(generator=ImageSequence(train_labels[0:28000], batch_size=10, start=0),
-                        steps_per_epoch=2800,
-                        epochs=15,
-                        validation_data=ImageSequence(train_labels[28000:31000], batch_size=10, start=28000),
-                        validation_steps=300)
-
+    train_history = model.fit_generator(generator=ImageSequence(train_labels[0:28], batch_size=batch_size, start=0),
+                                        steps_per_epoch=28,
+                                        epochs=1,
+                                        validation_data=ImageSequence(train_labels[28:31], batch_size=1,
+                                                                      start=28),
+                                        validation_steps=3)
+    # sanity check
     test_generator = ImageSequence(train_labels=train_labels[0:50], batch_size=40, start=0)
     x_test, y_test = test_generator.__getitem__(0);
     y_pred = np.round(model.predict(x_test), 2)
     print(y_pred)
-    with open("models/model2.json", "w") as json_file:
+
+    # save stuff
+    now = datetime.datetime.now()
+    modelID = str(now.day) + str(now.hour) + str(now.minute) + str(now.second)
+    destination = root + "models/" + modelID + "/"
+    if not os.path.isdir(destination):
+        os.mkdir(destination)
+
+    with open(destination + 'eggs.csv', 'w', newline='') as csvfile:
+        writeCsv(csvfile, lr, p, batch_size, train_history)
+
+    with open(destination + "model.json", "w") as json_file:
         json_model = model.to_json()
         json_file.write(json_model)
-    model.save('modelWeights/weights2')
 
-
+    model.save(destination + "weights")
 
     # load model
     # load_and_predict(train_labels[40:120], 40)
