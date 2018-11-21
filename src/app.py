@@ -114,7 +114,7 @@ class ImageSequence(Sequence):
         }
 
     def __len__(self):
-        return int(np.ceil(len(self.train_labels) / float(self.batch_size)))
+        return int(np.ceil((len(self.train_labels)) / float(self.batch_size)))-1
 
     def __getitem__(self, idx):
         trials = len(self.train_labels)
@@ -204,13 +204,9 @@ def model2(lrp, mp):
     return model
 
 
-def load_and_predict(model, train_labels, start):
+def loadModel(model):
     """
-    :param train_labels: loads the model that is in models/ and the
-    weights from modelWeights/, and the training datas that you pass into it.
-    :param start: an index in the original train labels. Tells you the first row
-    present in this data set
-    :return:
+    :return: a model
     """
     destination = root + "models/" + model
     with open(destination + "model.json", "r") as json_file:
@@ -218,17 +214,29 @@ def load_and_predict(model, train_labels, start):
         model = model_from_json(json_model)
     model.load_weights(destination + 'weights')
 
-    # load test data
-    test_generator = ImageSequence(train_labels=train_labels, batch_size=40, start=start)
-    x_test, y_test = test_generator.__getitem__(0);
-    print("The generated test data has mean: " + str(x_test.mean()))
-    print("The generated test data has std: " + str(np.std(x_test)))
-    print("The generated test data has shape: " + str(x_test.shape))
-    print("Test generator batches: " + str(test_generator.__len__()));
-    y_pred = model.predict(x_test)
+    return model
 
-    print(y_pred)
-    return y_pred
+
+def writePerformance(model, cm, precision, recall, notes):
+    """
+    try out a model on some test data
+    :param model: the NAME of the model
+    :param cm: the confusion matrix
+    :param notes: typically the test data
+    """
+    destination = root + "models/" + model
+    with open(destination + "performance.csv", "w") as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=';',
+                                quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        header = ["           ", "actual 0", "actual 1"]
+        row1 = ["predicted 0", str(int(cm[0][0])), str(int(cm[0][1]))]
+        row2 = ["predicted 1", str(int(cm[1][0])), str(int(cm[1][1]))]
+        csvwriter.writerow(header)
+        csvwriter.writerow(row1)
+        csvwriter.writerow(row2)
+        csvwriter.writerow(precision)
+        csvwriter.writerow(recall)
+        csvwriter.writerow(notes)
 
 
 def search_parameters(lrs, momentums):
@@ -264,41 +272,57 @@ def search_parameters(lrs, momentums):
     # model.save('modelWeights/weights')
 
 
-def writeCsv(csvfile, lr, p, batch_size, train_history):
-    head = ['type', 'learning rate', 'momentum', 'batch size','epoch 1', 'epoch 2', ' ... ']
+def writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
+             modelName):
+
+    head = ['type', 'epoch 1', 'epoch 2', ' ... ']
     spamwriter = csv.writer(csvfile, delimiter=';',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
     spamwriter.writerow(head)
     losses = train_history.history['loss']
     val_losses = train_history.history['val_loss']
-    spamwriter.writerow(["train", lr, p, batch_size] + losses)
-    spamwriter.writerow(["valid", lr, p, batch_size] + val_losses)
+    spamwriter.writerow(["train"] + losses)
+    spamwriter.writerow(["valid"] + val_losses)
+    spamwriter.writerow([" ... "])
+    spamwriter.writerow(["train",
+                         "train_labels: " + str(train_l) + ":" + str(train_h),
+                         "batch_size: " + str(train_batch_size),
+                         "learning rate: " + str(lr),
+                         "momentum: " + str(p),
+                         "model name: " + modelName])
+
+    spamwriter.writerow(["test",
+                         "test_labels: " + str(valid_l) + ":" + str(valid_h),
+                         "batch_size: " + str(valid_batch_size)])
+
 
 if __name__ == "__main__":
     # load the data
     train_labels = data()
 
-    # parameter search
-    # lrs = [math.pow(10, i) for i in range(0, 1, 1)]
-    # momentums = [.1]
-    # search_parameters(lrs, momentums)
-
-    lr = .1;
-    p = .1;
-    batch_size = 1;
+    # train a model
+    lr = .1
+    p = .1
     model = model2(lr, p)
 
-    train_history = model.fit_generator(generator=ImageSequence(train_labels[0:28], batch_size=batch_size, start=0),
-                                        steps_per_epoch=28,
-                                        epochs=1,
-                                        validation_data=ImageSequence(train_labels[28:31], batch_size=1,
-                                                                      start=28),
-                                        validation_steps=3)
-    # sanity check
-    test_generator = ImageSequence(train_labels=train_labels[0:50], batch_size=40, start=0)
-    x_test, y_test = test_generator.__getitem__(0);
-    y_pred = np.round(model.predict(x_test), 2)
-    print(y_pred)
+    train_l = 0; train_h = 50;
+    train_batch_size = 1
+    train_batches = 50
+
+    valid_l = 50; valid_h = 60;
+    valid_batch_size = 1 # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+    valid_batches = 10
+
+    train_history = model.fit_generator(generator=ImageSequence(train_labels[train_l:train_h],
+                                                                batch_size=train_batch_size,
+                                                                start=train_l),
+                                        steps_per_epoch=train_batches,
+                                        epochs=2,
+                                        validation_data=ImageSequence(train_labels[valid_l:valid_h],
+                                                                      batch_size=valid_batch_size,
+                                                                      start=valid_l),
+                                        validation_steps=valid_batches)
 
     # save stuff
     now = datetime.datetime.now()
@@ -308,7 +332,8 @@ if __name__ == "__main__":
         os.mkdir(destination)
 
     with open(destination + 'eggs.csv', 'w', newline='') as csvfile:
-        writeCsv(csvfile, lr, p, batch_size, train_history)
+        writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
+                 "model2")
 
     with open(destination + "model.json", "w") as json_file:
         json_model = model.to_json()
@@ -316,5 +341,5 @@ if __name__ == "__main__":
 
     model.save(destination + "weights")
 
-    # load model
-    # load_and_predict(train_labels[40:120], 40)
+
+
