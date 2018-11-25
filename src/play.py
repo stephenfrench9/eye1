@@ -3,12 +3,12 @@ import numpy as np
 
 if __name__ == '__main__':
     train_labels = app.data()
-    modelOfInterest = "ants/"
+    modelOfInterest = "showers/"
     model = app.loadModel(modelOfInterest)
 
     # load test data
     batch_size = 30
-    valid_l = 30500; valid_h = 31000
+    valid_l = 28000; valid_h = 31000
     test_generator = app.ImageSequence(train_labels=train_labels[valid_l:valid_h],
                                        batch_size=batch_size,
                                        start=valid_l)
