@@ -1,8 +1,6 @@
 import app
 
 if __name__ == '__main__':
-    print("huo")
-
     train_labels = app.data()
 
     seq = app.ImageSequence(train_labels=train_labels[0:100], batch_size=10, start=0)
@@ -11,4 +9,4 @@ if __name__ == '__main__':
 
     print(x.shape)
     print(y.shape)
-
+    print(y)

@@ -118,7 +118,7 @@ class ImageSequence(Sequence):
 
     def __getitem__(self, idx):
         trials = len(self.train_labels)
-        y = np.ones(self.batch_size)
+        y = np.ones((self.batch_size, 28))
         x = np.ones((1, 512, 512, 4))
 
         # x = np.ones((1, 512, 512))
@@ -140,12 +140,14 @@ class ImageSequence(Sequence):
             im = np.append(im, ye, axis=2)
             im = np.append(im, g, axis=2)
             x = np.append(x, [im], axis=0)
-            y[i] = self.train_labels.at[sample, self.labels.get(0)]
+            # y[i] = self.train_labels.at[sample, self.labels.get(0)]
+            g = self.train_labels.ix[sample]
+            y[i, :] = np.array(g[2:])
 
         x = x[1:, 100:200, 100:200, :]
 
-        y = y.reshape(self.batch_size, 1)
-        y = keras.utils.to_categorical(y, num_classes=2)
+        # y = y.reshape(self.batch_size, 1)
+        # y = keras.utils.to_categorical(y, num_classes=2)
 
         max = np.max(x)
         max = abs(max)
@@ -195,6 +197,18 @@ def model2(lrp, mp):
     ax0range = 10;
     ax1range = 40000;
     categories = 2;
+
+    model = Sequential()
+    model.add(Dense(1000, activation='relu', input_dim=40000))
+    model.add(Dense(categories, activation='softmax'))
+    sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd)
+    return model
+
+def model3(lrp, mp):
+    ax0range = 10;
+    ax1range = 40000;
+    categories = 28;
 
     model = Sequential()
     model.add(Dense(1000, activation='relu', input_dim=40000))
@@ -304,15 +318,15 @@ if __name__ == "__main__":
     # train a model
     lr = .1
     p = .1
-    model = model2(lr, p)
+    model = model3(lr, p)
 
-    train_l = 0; train_h = 50;
-    train_batch_size = 1
-    train_batches = 50
+    train_l = 0; train_h = 28000;
+    train_batch_size = 4
+    train_batches = 7000
 
-    valid_l = 50; valid_h = 60;
-    valid_batch_size = 1 # valid_batch_size =10 and valid_batches = 1 does not work ... cra
-    valid_batches = 10
+    valid_l = 28000; valid_h = 31000;
+    valid_batch_size = 2 # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+    valid_batches = 1500
 
     train_history = model.fit_generator(generator=ImageSequence(train_labels[train_l:train_h],
                                                                 batch_size=train_batch_size,
