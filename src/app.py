@@ -137,10 +137,10 @@ class ImageSequence(Sequence):
             y[i, :] = np.array(g[2:])
 
         x = x[1:, 100:200, 100:200, :]
-        plt.imsave("/ralston/pictures/blue.png", x[0][:, :, 0])
-        plt.imsave("/ralston/pictures/red.png", x[0][:, :, 1])
-        plt.imsave("/ralston/pictures/yellow.png", x[0][:, :, 2])
-        plt.imsave("/ralston/pictures/green.png", x[0][:, :, 3])
+        # plt.imsave("/ralston/pictures/blue.png", x[0][:, :, 0])
+        # plt.imsave("/ralston/pictures/red.png", x[0][:, :, 1])
+        # plt.imsave("/ralston/pictures/yellow.png", x[0][:, :, 2])
+        # plt.imsave("/ralston/pictures/green.png", x[0][:, :, 3])
 
         # y = y.reshape(self.batch_size, 1)
         # y = keras.utils.to_categorical(y, num_classes=2)
