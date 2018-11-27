@@ -118,8 +118,10 @@ class ImageSequence(Sequence):
 
     def __getitem__(self, idx):
         trials = len(self.train_labels)
-        y = np.ones((self.batch_size, 28))
+        y = np.ones((self.batch_size, 1))
         x = np.ones((1, 512, 512, 4))
+
+        # y = to_cate
 
         # x = np.ones((1, 512, 512))
         for i in range(self.batch_size):
@@ -134,7 +136,7 @@ class ImageSequence(Sequence):
             x = np.append(x, [im], axis=0)
             # y[i] = self.train_labels.at[sample, self.labels.get(0)]
             g = self.train_labels.ix[sample]
-            y[i, :] = np.array(g[2:])
+            y[i, :] = np.array(g[2:3])
 
         x = x[1:, 100:200, 100:200, :]
         # plt.imsave("/ralston/pictures/blue.png", x[0][:, :, 0])
@@ -143,7 +145,7 @@ class ImageSequence(Sequence):
         # plt.imsave("/ralston/pictures/green.png", x[0][:, :, 3])
 
         # y = y.reshape(self.batch_size, 1)
-        # y = keras.utils.to_categorical(y, num_classes=2)
+        y = keras.utils.to_categorical(y, num_classes=2)
 
         max = np.max(x)
         max = abs(max)
@@ -217,11 +219,34 @@ def model3(lrp, mp):
 
 
 def model4(lrp, mp):
+    """destined to fail - you cant predict rare categories with common ones.
+    just produces straight zeros. only predicts zeros for everything"""
     ax0range = 10;
     ax1range = 100;
     ax2range = 100;
     ax3range = 4;
     categories = 28;
+
+    model = Sequential()
+    model.add(Conv2D(2, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
+    model.add(MaxPooling2D(pool_size=(7, 7)))
+    # model.add(Conv2D(4, (5, 5), activation='relu'))
+    # model.add(Dropout(0.25))
+    model.add(Flatten())
+    # model.add(BatchNormalization(axis=1))
+    model.add(Dense(categories, activation='softmax'))
+    sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd)
+    return model
+
+
+def model5(lrp, mp):
+    """only predict one category at a time"""
+    ax0range = 10;
+    ax1range = 100;
+    ax2range = 100;
+    ax3range = 4;
+    categories = 2;
 
     model = Sequential()
     model.add(Conv2D(2, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
@@ -292,10 +317,12 @@ def writePerformanceMulti(model, precisions, recalls, notes):
         csvwriter.writerow(notes)
 
 
-def search_parameters(lrs, momentums):
+def search_parameters(lrs, momentums, train_labels):
     now = datetime.datetime.now()
-    modelID = str(now.day) + str(now.hour) + str(now.min) + str(now.second)
+    modelID = str(now.day) + str(now.hour) + str(now.minute) + str(now.second)
     destination = root + "models/" + modelID + "/"
+    if not os.path.isdir(destination):
+        os.mkdir(destination)
     csvfile = open(destination + 'eggs.csv', 'w', newline='')
     head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
     spamwriter = csv.writer(csvfile, delimiter=';',
@@ -303,7 +330,7 @@ def search_parameters(lrs, momentums):
     spamwriter.writerow(head)
     for lr in lrs:
         for m in momentums:
-            model = model0(lr, m)
+            model = model5(lr, m)
             # ------------------------ Fit the Model -------------------------------
             print("Number of samples available: " + str(len(train_labels)))
             train_history = model.fit_generator(
@@ -357,15 +384,15 @@ if __name__ == "__main__":
     # train a model
     lr = .1
     p = .1
-    model = model4(lr, p)
+    model = model5(lr, p)
 
     train_l = 0; train_h = 28000;
     train_batch_size = 2
-    train_batches = 7000
+    train_batches = train_h/train_batch_size
 
     valid_l = 28000; valid_h = 31000;
     valid_batch_size = 2 # valid_batch_size =10 and valid_batches = 1 does not work ... cra
-    valid_batches = 1500
+    valid_batches = (valid_h-valid_l)/valid_batch_size
 
     train_history = model.fit_generator(generator=ImageSequence(train_labels[train_l:train_h],
                                                                 batch_size=train_batch_size,
