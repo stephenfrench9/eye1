@@ -125,17 +125,9 @@ class ImageSequence(Sequence):
         for i in range(self.batch_size):
             sample = self.start + i + idx * self.batch_size
             b = imread(self.base + self.train_labels.at[sample, 'Id'] + self.red).reshape((512, 512, 1))
-            b = b / np.std(b)
-            b = b - b.mean()
             r = imread(self.base + self.train_labels.at[sample, 'Id'] + self.blue).reshape((512, 512, 1))
-            r = r / np.std(r)
-            r = r - r.mean()
             ye = imread(self.base + self.train_labels.at[sample, 'Id'] + self.yellow).reshape((512, 512, 1))
-            ye = ye / np.std(ye)
-            ye = ye - ye.mean()
             g = imread(self.base + self.train_labels.at[sample, 'Id'] + self.green).reshape((512, 512, 1))
-            g = g / np.std(g)
-            g = g - g.mean()
             im = np.append(b, r, axis=2)
             im = np.append(im, ye, axis=2)
             im = np.append(im, g, axis=2)
@@ -145,6 +137,10 @@ class ImageSequence(Sequence):
             y[i, :] = np.array(g[2:])
 
         x = x[1:, 100:200, 100:200, :]
+        plt.imsave("/ralston/pictures/blue.png", x[0][:, :, 0])
+        plt.imsave("/ralston/pictures/red.png", x[0][:, :, 1])
+        plt.imsave("/ralston/pictures/yellow.png", x[0][:, :, 2])
+        plt.imsave("/ralston/pictures/green.png", x[0][:, :, 3])
 
         # y = y.reshape(self.batch_size, 1)
         # y = keras.utils.to_categorical(y, num_classes=2)
@@ -213,6 +209,26 @@ def model3(lrp, mp):
     model = Sequential()
     model.add(Dense(1000, activation='relu', input_dim=40000))
     model.add(Dense(categories, activation='softmax'))
+    sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd)
+    return model
+
+
+def model4(lrp, mp):
+    ax0range = 10;
+    ax1range = 100;
+    ax2range = 100;
+    ax3range = 4;
+    categories = 2;
+
+    model = Sequential()
+    model.add(Conv2D(10, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
+
+    # model.add(MaxPooling2D(pool_size=(5, 5)))
+    # model.add(Dropout(0.25))
+    # model.add(Flatten())
+    # model.add(BatchNormalization(axis=1))
+    # model.add(Dense(categories, activation='softmax'))
     sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd)
     return model
