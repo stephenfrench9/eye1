@@ -26,6 +26,7 @@ if __name__ == '__main__':
 
         print(str(batch) + " out of " + str(num_batches))
         for i in range(y_pred.shape[0]):
+            # this produces backwards results for model ants/ and model showers/
             prediction = int(y_pred[i][membership])  # real nice ... look at a diff column when
             actual = int(y_act[i][membership])  # building the confusion matrix
             a0[prediction][actual] += 1
