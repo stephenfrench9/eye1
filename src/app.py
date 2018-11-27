@@ -231,7 +231,7 @@ def loadModel(model):
     return model
 
 
-def writePerformance(model, cm, precision, recall, notes):
+def writePerformanceSingle(model, cm, precision, recall, notes):
     """
     try out a model on some test data
     :param model: the NAME of the model
@@ -251,6 +251,28 @@ def writePerformance(model, cm, precision, recall, notes):
         csvwriter.writerow(precision)
         csvwriter.writerow(recall)
         csvwriter.writerow(notes)
+
+def writePerformanceMulti(model, precisions, recalls, notes):
+    """
+    Write to a csv the precisions and recalls for every class
+    :param model: the NAME of the model
+    :param precisions: all the precisions for all the difference classes
+    :param notes: typically the test data
+    """
+    destination = root + "models/" + model
+    with open(destination + "performance.csv", "a") as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=';',
+                                quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        header = ["Class Number", "Precision", "Recall"]
+        csvwriter.writerow(header)
+
+        for i in range(28):
+            i = i +1
+            csvwriter.writerow([str(i), precisions[i], recalls[i]])
+
+        csvwriter.writerow(notes)
+
+
 
 
 def search_parameters(lrs, momentums):
