@@ -8,10 +8,14 @@ if __name__ == '__main__':
 
     x, y = seq.__getitem__(0)
 
+    print(x.shape)
     x = x.reshape(10, 100, 100, 4)
 
-    im = plt.imsave("/ralston/pictures/hooligan.png", x[0][:, :, 0])
+    model = app.model4(.1, .1)
 
-    print(x.shape)
-    print(y.shape)
-    print(y)
+    y_pred = model.predict(x)
+
+    print("input: " + str(x.shape))
+    print("output: " + str(y_pred.shape))
+
+

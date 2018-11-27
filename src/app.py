@@ -152,7 +152,8 @@ class ImageSequence(Sequence):
         x -= mean
 
         o = x.shape
-        x = x.reshape(o[0], o[1] * o[2] * o[3])
+        # print(o)
+        # x = x.reshape(o[0], o[1] * o[2] * o[3])
 
         return x, y
 
@@ -201,6 +202,7 @@ def model2(lrp, mp):
     model.compile(loss='categorical_crossentropy', optimizer=sgd)
     return model
 
+
 def model3(lrp, mp):
     ax0range = 10;
     ax1range = 40000;
@@ -219,16 +221,16 @@ def model4(lrp, mp):
     ax1range = 100;
     ax2range = 100;
     ax3range = 4;
-    categories = 2;
+    categories = 28;
 
     model = Sequential()
-    model.add(Conv2D(10, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
-
-    # model.add(MaxPooling2D(pool_size=(5, 5)))
+    model.add(Conv2D(2, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
+    model.add(MaxPooling2D(pool_size=(7, 7)))
+    # model.add(Conv2D(4, (5, 5), activation='relu'))
     # model.add(Dropout(0.25))
-    # model.add(Flatten())
+    model.add(Flatten())
     # model.add(BatchNormalization(axis=1))
-    # model.add(Dense(categories, activation='softmax'))
+    model.add(Dense(categories, activation='softmax'))
     sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
     model.compile(loss='categorical_crossentropy', optimizer=sgd)
     return model
@@ -268,6 +270,7 @@ def writePerformanceSingle(model, cm, precision, recall, notes):
         csvwriter.writerow(recall)
         csvwriter.writerow(notes)
 
+
 def writePerformanceMulti(model, precisions, recalls, notes):
     """
     Write to a csv the precisions and recalls for every class
@@ -287,8 +290,6 @@ def writePerformanceMulti(model, precisions, recalls, notes):
             csvwriter.writerow([str(i), precisions[i], recalls[i]])
 
         csvwriter.writerow(notes)
-
-
 
 
 def search_parameters(lrs, momentums):
@@ -356,10 +357,10 @@ if __name__ == "__main__":
     # train a model
     lr = .1
     p = .1
-    model = model3(lr, p)
+    model = model4(lr, p)
 
     train_l = 0; train_h = 28000;
-    train_batch_size = 4
+    train_batch_size = 2
     train_batches = 7000
 
     valid_l = 28000; valid_h = 31000;
@@ -370,7 +371,7 @@ if __name__ == "__main__":
                                                                 batch_size=train_batch_size,
                                                                 start=train_l),
                                         steps_per_epoch=train_batches,
-                                        epochs=2,
+                                        epochs=15,
                                         validation_data=ImageSequence(train_labels[valid_l:valid_h],
                                                                       batch_size=valid_batch_size,
                                                                       start=valid_l),
