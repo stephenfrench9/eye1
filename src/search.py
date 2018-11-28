@@ -8,5 +8,4 @@ if __name__ == "__main__":
 
     train_labels = app.data()
 
-
     app.search_parameters(lrs, ms, train_labels=train_labels)

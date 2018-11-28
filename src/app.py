@@ -320,36 +320,64 @@ def writePerformanceMulti(model, precisions, recalls, notes):
 def search_parameters(lrs, momentums, train_labels):
     now = datetime.datetime.now()
     modelID = str(now.day) + str(now.hour) + str(now.minute) + str(now.second)
-    destination = root + "models/" + modelID + "/"
+    destination = root + "searches/" + modelID + "/"
     if not os.path.isdir(destination):
         os.mkdir(destination)
     csvfile = open(destination + 'eggs.csv', 'w', newline='')
     head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
     spamwriter = csv.writer(csvfile, delimiter=';',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
     spamwriter.writerow(head)
     for lr in lrs:
         for m in momentums:
+            modelName = "model5"
             model = model5(lr, m)
-            # ------------------------ Fit the Model -------------------------------
-            print("Number of samples available: " + str(len(train_labels)))
-            train_history = model.fit_generator(
-                generator=ImageSequence(train_labels=train_labels[0:28], batch_size=2, start=0),
-                steps_per_epoch=14,
-                epochs=5,
-                validation_data=ImageSequence(train_labels=train_labels[28:31], batch_size=1, start=28),
-                validation_steps=3)
 
-            # -----------------------record the results---------------------------
+            train_l = 0;
+            train_h = 28;
+            train_batch_size = 2
+            train_batches = train_h / train_batch_size
+
+            valid_l = 28;
+            valid_h = 31;
+            valid_batch_size = 1  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+            valid_batches = (valid_h - valid_l) / valid_batch_size
+
+            train_history = model.fit_generator(
+                generator=ImageSequence(train_labels[train_l:train_h],
+                                        batch_size=train_batch_size,
+                                        start=train_l),
+                steps_per_epoch=train_batches,
+                epochs=5,
+                validation_data=ImageSequence(train_labels[valid_l:valid_h],
+                                              batch_size=valid_batch_size,
+                                              start=valid_l),
+                validation_steps=valid_batches)
+
             losses = train_history.history['loss']
             val_losses = train_history.history['val_loss']
             spamwriter.writerow(["train", lr, m] + losses)
             spamwriter.writerow(["valid", lr, m] + val_losses)
+            # spamwriter.writerow(["precision", lr, m] + [precision])
+            # spamwriter.writerow(["precision", lr, m] + [precision])
+
+
+
+    spamwriter.writerow([".."])
+    spamwriter.writerow(["train",
+                         "train_labels: " + str(train_l) + ":" + str(train_h),
+                         "batch_size: " + str(train_batch_size),
+                         "learning rate: " + str(lr),
+                         "momentum: " + str(m),
+                         "model name: " + modelName])
+
+    spamwriter.writerow(["test",
+                         "test_labels: " + str(valid_l) + ":" + str(valid_h),
+                         "batch_size: " + str(valid_batch_size)])
+
+
     csvfile.close()
-    # with open("models/model.json", "w") as json_file:
-    #     json_model = model.to_json()
-    #     json_file.write(json_model)
-    # model.save('modelWeights/weights')
 
 
 def writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
@@ -384,6 +412,7 @@ if __name__ == "__main__":
     # train a model
     lr = .1
     p = .1
+    modelName = "model5"
     model = model5(lr, p)
 
     train_l = 0; train_h = 28000;
@@ -413,7 +442,7 @@ if __name__ == "__main__":
 
     with open(destination + 'eggs.csv', 'w', newline='') as csvfile:
         writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
-                 "model2")
+                 modelName)
 
     with open(destination + "model.json", "w") as json_file:
         json_model = model.to_json()
