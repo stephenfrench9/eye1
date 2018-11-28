@@ -257,7 +257,7 @@ def model5(lrp, mp):
     # model.add(BatchNormalization(axis=1))
     model.add(Dense(categories, activation='softmax'))
     sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics = ['accuracy'])
     return model
 
 
@@ -319,7 +319,7 @@ def writePerformanceMulti(model, precisions, recalls, notes):
 
 def search_parameters(lrs, momentums, train_labels):
     now = datetime.datetime.now()
-    modelID = str(now.day) + str(now.hour) + str(now.minute) + str(now.second)
+    modelID = str(now.day) + "-" + str(now.hour) + "-" + str(now.minute)
     destination = root + "searches/" + modelID + "/"
     if not os.path.isdir(destination):
         os.mkdir(destination)
@@ -357,8 +357,11 @@ def search_parameters(lrs, momentums, train_labels):
 
             losses = train_history.history['loss']
             val_losses = train_history.history['val_loss']
+            accuracy = train_history.history['acc']
+            print(train_history.history.keys())
             spamwriter.writerow(["train", lr, m] + losses)
             spamwriter.writerow(["valid", lr, m] + val_losses)
+            spamwriter.writerow(["accuracy", lr, m] + accuracy)
             # spamwriter.writerow(["precision", lr, m] + [precision])
             # spamwriter.writerow(["precision", lr, m] + [precision])
 
@@ -371,7 +374,6 @@ def search_parameters(lrs, momentums, train_labels):
                          "learning rate: " + str(lr),
                          "momentum: " + str(m),
                          "model name: " + modelName])
-
     spamwriter.writerow(["test",
                          "test_labels: " + str(valid_l) + ":" + str(valid_h),
                          "batch_size: " + str(valid_batch_size)])
@@ -435,7 +437,7 @@ if __name__ == "__main__":
 
     # save stuff
     now = datetime.datetime.now()
-    modelID = str(now.day) + str(now.hour) + str(now.minute) + str(now.second)
+    modelID = str(now.day) + "-" + str(now.hour) + "-" + str(now.minute)
     destination = root + "models/" + modelID + "/"
     if not os.path.isdir(destination):
         os.mkdir(destination)
