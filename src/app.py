@@ -327,23 +327,27 @@ def search_parameters(lrs, momentums, train_labels):
     head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
     spamwriter = csv.writer(csvfile, delimiter=';',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
+    modelName = "model5"
+    train_l = 0;
+    train_h = 28;
+    train_batch_size = 2
+    train_batches = train_h / train_batch_size
 
+    valid_l = 28;
+    valid_h = 31;
+    valid_batch_size = 1  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+    valid_batches = (valid_h - valid_l) / valid_batch_size
+    spamwriter.writerow(["train_data",
+                         "train_labels: " + str(train_l) + ":" + str(train_h),
+                         "batch_size: " + str(train_batch_size),
+                         modelName])
+    spamwriter.writerow(["test_data",
+                         "test_labels: " + str(valid_l) + ":" + str(valid_h),
+                         "batch_size: " + str(valid_batch_size)])
     spamwriter.writerow(head)
     for lr in lrs:
         for m in momentums:
-            modelName = "model5"
             model = model5(lr, m)
-
-            train_l = 0;
-            train_h = 28;
-            train_batch_size = 2
-            train_batches = train_h / train_batch_size
-
-            valid_l = 28;
-            valid_h = 31;
-            valid_batch_size = 1  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
-            valid_batches = (valid_h - valid_l) / valid_batch_size
-
             train_history = model.fit_generator(
                 generator=ImageSequence(train_labels[train_l:train_h],
                                         batch_size=train_batch_size,
@@ -367,16 +371,7 @@ def search_parameters(lrs, momentums, train_labels):
 
 
 
-    spamwriter.writerow([".."])
-    spamwriter.writerow(["train",
-                         "train_labels: " + str(train_l) + ":" + str(train_h),
-                         "batch_size: " + str(train_batch_size),
-                         "learning rate: " + str(lr),
-                         "momentum: " + str(m),
-                         "model name: " + modelName])
-    spamwriter.writerow(["test",
-                         "test_labels: " + str(valid_l) + ":" + str(valid_h),
-                         "batch_size: " + str(valid_batch_size)])
+
 
 
     csvfile.close()
