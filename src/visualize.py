@@ -5,7 +5,7 @@ import numpy as np
 
 if __name__ == '__main__':
     root = "/ralston/"
-    searchOfInterest = "29-22-19/"
+    searchOfInterest = "30-18-21/"
 
     csv_file = open(root + "searches/" + searchOfInterest + "eggs.csv", 'r', newline='')
 
@@ -38,3 +38,4 @@ if __name__ == '__main__':
                 plt.clf()
         i += 1
 
+    csv_file.close()

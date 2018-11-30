@@ -240,7 +240,7 @@ def model4(lrp, mp):
     return model
 
 
-def model5(lrp, mp):
+def model5(lrp, mp, neurons):
     """only predict one category at a time"""
     ax0range = 10;
     ax1range = 100;
@@ -255,9 +255,10 @@ def model5(lrp, mp):
     # model.add(Dropout(0.25))
     model.add(Flatten())
     # model.add(BatchNormalization(axis=1))
+    model.add(Dense(neurons, activation='relu'))
     model.add(Dense(categories, activation='softmax'))
     sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics = ['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=sgd)
     return model
 
 
@@ -317,7 +318,7 @@ def writePerformanceMulti(model, precisions, recalls, notes):
         csvwriter.writerow(notes)
 
 
-def search_parameters(lrs, momentums, train_labels):
+def search_parameters(lrs, momentums, neurons, train_labels):
     now = datetime.datetime.now()
     modelID = str(now.day) + "-" + str(now.hour) + "-" + str(now.minute)
     destination = root + "searches/" + modelID + "/"
@@ -329,13 +330,13 @@ def search_parameters(lrs, momentums, train_labels):
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
     modelName = "model5"
     train_l = 0;
-    train_h = 28;
+    train_h = 2800;
     train_batch_size = 2
     train_batches = train_h / train_batch_size
-
-    valid_l = 28;
-    valid_h = 31;
-    valid_batch_size = 1  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+    # 0:28,000 and 28,000:31,000
+    valid_l = 2800;
+    valid_h = 3100;
+    valid_batch_size = 2  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
     valid_batches = (valid_h - valid_l) / valid_batch_size
     spamwriter.writerow(["train_data",
                          "train_labels: " + str(train_l) + ":" + str(train_h),
@@ -347,32 +348,23 @@ def search_parameters(lrs, momentums, train_labels):
     spamwriter.writerow(head)
     for lr in lrs:
         for m in momentums:
-            model = model5(lr, m)
-            train_history = model.fit_generator(
-                generator=ImageSequence(train_labels[train_l:train_h],
-                                        batch_size=train_batch_size,
-                                        start=train_l),
-                steps_per_epoch=train_batches,
-                epochs=5,
-                validation_data=ImageSequence(train_labels[valid_l:valid_h],
-                                              batch_size=valid_batch_size,
-                                              start=valid_l),
-                validation_steps=valid_batches)
+            for n in neurons:
+                model = model5(lr, m, n)
+                train_history = model.fit_generator(
+                    generator=ImageSequence(train_labels[train_l:train_h],
+                                            batch_size=train_batch_size,
+                                            start=train_l),
+                    steps_per_epoch=train_batches,
+                    epochs=20,
+                    validation_data=ImageSequence(train_labels[valid_l:valid_h],
+                                                  batch_size=valid_batch_size,
+                                                  start=valid_l),
+                    validation_steps=valid_batches)
 
-            losses = train_history.history['loss']
-            val_losses = train_history.history['val_loss']
-            accuracy = train_history.history['acc']
-            print(train_history.history.keys())
-            spamwriter.writerow(["train", lr, m] + losses)
-            spamwriter.writerow(["valid", lr, m] + val_losses)
-            spamwriter.writerow(["accuracy", lr, m] + accuracy)
-            # spamwriter.writerow(["precision", lr, m] + [precision])
-            # spamwriter.writerow(["precision", lr, m] + [precision])
-
-
-
-
-
+                losses = train_history.history['loss']
+                val_losses = train_history.history['val_loss']
+                spamwriter.writerow(["train", lr, m] + losses)
+                spamwriter.writerow(["valid", lr, m] + val_losses)
 
     csvfile.close()
 
