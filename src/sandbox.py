@@ -11,6 +11,9 @@ if __name__ == '__main__':
 
     model = app.model5(.1, .1)
 
+
+
+
     y_pred = model.predict(x)
 
     print("actual: ")
