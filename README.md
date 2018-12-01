@@ -16,7 +16,7 @@ The results were not very sensitive to fifth layer neuron count. All combination
 and momentum lead to no improvements in training or testing loss, except for lr=.1 and momentum=0.
 Figures 1 through 4 below show results.
 
-<img src="model5100neurons.png" alt="drawing reality" width="100"/>
+<img src="/readmePics/model5100neurons.png" alt="drawing reality" width="100"/>
 ![Best Parameters 10 neurons](/readmePics/model5100neurons.png)
 
 ![Similar Parameters 100 neurons](/readmePics/model510neurons.png)
