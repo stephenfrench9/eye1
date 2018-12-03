@@ -4,7 +4,7 @@ import numpy as np
 if __name__ == '__main__':
     train_labels = app.data()
     modelOfInterest = "showers/"
-    model = app.loadModel(modelOfInterest)
+    model = app.load_model(modelOfInterest)
 
     # load test data
     batch_size = 30

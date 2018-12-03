@@ -1,9 +1,9 @@
 import csv
 import datetime
 import keras
+import keras.backend as K
+import tensorflow as tf
 import os
-import math
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import warnings
@@ -258,11 +258,11 @@ def model5(lrp, mp, neurons):
     model.add(Dense(neurons, activation='relu'))
     model.add(Dense(categories, activation='softmax'))
     sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
-    model.compile(loss='categorical_crossentropy', optimizer=sgd)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=[act_1, pred_1])
     return model
 
 
-def loadModel(model):
+def load_model(model):
     """
     :return: a model
     """
@@ -297,7 +297,7 @@ def writePerformanceSingle(model, cm, precision, recall, notes):
         csvwriter.writerow(notes)
 
 
-def writePerformanceMulti(model, precisions, recalls, notes):
+def write_performance_multi(model, precisions, recalls, notes):
     """
     Write to a csv the precisions and recalls for every class
     :param model: the NAME of the model
@@ -318,6 +318,47 @@ def writePerformanceMulti(model, precisions, recalls, notes):
         csvwriter.writerow(notes)
 
 
+def pred_1(y_true, y_pred):
+    """returns the average number per batch that are predicted to belong to the class
+    in other words: tells you how many 1's were predicted. useful if you are afraid that
+    your model is just predicting all ones.
+    """
+    positives = K.sum(K.round(K.clip(y_pred[:, 1], 0, 1)))
+    yy = tf.to_float(tf.size(y_true[:, 1]))
+    return positives/yy
+
+
+def act_1(y_true, y_pred):
+    """returns the avg freq of 1's
+    """
+    possible_positives = K.sum(K.round(K.clip(y_true[:, 1], 0, 1)))
+    yy = tf.to_float(tf.size(y_true[:, 1]))
+    return possible_positives/yy
+
+def precisionMetric(y_true, y_pred):
+
+    print("type: " + str(type(y_true)))
+    print("value " + str(y_true))
+    print("now!!!")
+    print(y_pred.eval())
+    membership = 0  # column of predicted and actual results to examine
+    a0 = np.zeros((2, 2))
+
+    for i in range(y_pred.shape[0]):
+        # this produces backwards results for model ants/ and model showers/
+        prediction = int(y_pred[i][membership])  # real nice ... look at a diff column when
+        actual = int(y_true[i][membership])  # building the confusion matrix
+        a0[prediction][actual] += 1
+
+    # calculate performance metrics
+    class0 = a0[0][1] + a0[1][1]
+    recall = a0[1][1] / class0
+    exclaim = a0[1][0] + a0[1][1]
+    precision = a0[1][1] / exclaim
+
+    return precision
+
+
 def search_parameters(lrs, momentums, neurons, train_labels):
     now = datetime.datetime.now()
     modelID = str(now.day) + "-" + str(now.hour) + "-" + str(now.minute)
@@ -330,13 +371,13 @@ def search_parameters(lrs, momentums, neurons, train_labels):
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
     modelName = "model5"
     train_l = 0;
-    train_h = 2800;
-    train_batch_size = 2
+    train_h = 50;
+    train_batch_size = 10
     train_batches = train_h / train_batch_size
     # 0:28,000 and 28,000:31,000
-    valid_l = 2800;
-    valid_h = 3100;
-    valid_batch_size = 2  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+    valid_l = 27;
+    valid_h = 35;
+    valid_batch_size = 4  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
     valid_batches = (valid_h - valid_l) / valid_batch_size
     spamwriter.writerow(["train_data",
                          "train_labels: " + str(train_l) + ":" + str(train_h),
@@ -355,7 +396,7 @@ def search_parameters(lrs, momentums, neurons, train_labels):
                                             batch_size=train_batch_size,
                                             start=train_l),
                     steps_per_epoch=train_batches,
-                    epochs=20,
+                    epochs=5,
                     validation_data=ImageSequence(train_labels[valid_l:valid_h],
                                                   batch_size=valid_batch_size,
                                                   start=valid_l),
@@ -363,8 +404,12 @@ def search_parameters(lrs, momentums, neurons, train_labels):
 
                 losses = train_history.history['loss']
                 val_losses = train_history.history['val_loss']
+                pred_1 = train_history.history['pred_1']
+                act_1 = train_history.history['act_1']
                 spamwriter.writerow(["train", lr, m] + losses)
                 spamwriter.writerow(["valid", lr, m] + val_losses)
+                spamwriter.writerow(["pred_1", lr, m] + pred_1)
+                spamwriter.writerow(["act_1", lr, m] + act_1)
 
     csvfile.close()
 

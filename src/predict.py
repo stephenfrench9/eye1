@@ -9,7 +9,7 @@ if __name__ == "__main__":
     modelOfInterest = "showers/"
     root = "/ralston/"
 
-    model = app.loadModel(modelOfInterest)
+    model = app.load_model(modelOfInterest)
 
 
     testPics = sorted(os.listdir("test/"))
