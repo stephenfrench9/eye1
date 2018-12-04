@@ -6,7 +6,7 @@ import os
 
 
 if __name__ == "__main__":
-    modelOfInterest = "4-3-9/"
+    modelOfInterest = "4-18-36/"
     root = "/ralston/"
 
     model = app.load_model(modelOfInterest)
@@ -28,14 +28,14 @@ if __name__ == "__main__":
 
     while currentGroup < numGroups:
         print("start of the batch: " + str(currentGroup))
-        x = np.ones((1, 100, 100, 4))
+        x = np.ones((1, 512, 512, 4))
         trials = []
         while x.shape[0] - 1 < batch_size and currentGroup < numGroups:
             raw_index = currentGroup*4
-            image_0 = plt.imread("test/" + testPics[raw_index + 0]).reshape(512, 512, 1)[200:300, 200:300, :]
-            image_1 = plt.imread("test/" + testPics[raw_index + 1]).reshape(512, 512, 1)[200:300, 200:300, :]
-            image_2 = plt.imread("test/" + testPics[raw_index + 2]).reshape(512, 512, 1)[200:300, 200:300, :]
-            image_3 = plt.imread("test/" + testPics[raw_index + 3]).reshape(512, 512, 1)[200:300, 200:300, :]
+            image_0 = plt.imread("test/" + testPics[raw_index + 0]).reshape(512, 512, 1)
+            image_1 = plt.imread("test/" + testPics[raw_index + 1]).reshape(512, 512, 1)
+            image_2 = plt.imread("test/" + testPics[raw_index + 2]).reshape(512, 512, 1)
+            image_3 = plt.imread("test/" + testPics[raw_index + 3]).reshape(512, 512, 1)
 
             trials.append(testPics[raw_index][:-9])
             currentGroup += 1

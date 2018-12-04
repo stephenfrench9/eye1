@@ -384,7 +384,7 @@ def precisionMetric(y_true, y_pred):
 
 def search_parameters(lrs, momentums, neurons, filters, train_labels):
     now = datetime.datetime.now()
-    modelID = str(now.day) + "-" + str(now.hour) + "-" + str(now.minute)
+    modelID = str(now.day) + "-" + str(now.hour) + "-" + str(now.minute) + "-" + str(now.second)
     destination = root + "searches/" + modelID + "/"
     if not os.path.isdir(destination):
         os.mkdir(destination)
@@ -507,7 +507,7 @@ if __name__ == "__main__":
 
     # save stuff
     now = datetime.datetime.now()
-    modelID = str(now.day) + "-" + str(now.hour) + "-" + str(now.minute)
+    modelID = str(now.day) + "-" + str(now.hour) + "-" + str(now.minute) + "-" + str(now.second)
     destination = root + "models/" + modelID + "/"
     if not os.path.isdir(destination):
         os.mkdir(destination)

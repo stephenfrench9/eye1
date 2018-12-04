@@ -3,7 +3,7 @@ import numpy as np
 
 if __name__ == '__main__':
     train_labels = app.data()
-    modelOfInterest = "4-3-9/"
+    modelOfInterest = "4-18-36/"
     model = app.load_model(modelOfInterest)
 
     # load test data
