@@ -382,7 +382,7 @@ def precisionMetric(y_true, y_pred):
     return precision
 
 
-def search_parameters(lrs, momentums, neurons, train_labels):
+def search_parameters(lrs, momentums, neurons, filters, train_labels):
     now = datetime.datetime.now()
     modelID = str(now.day) + "-" + str(now.hour) + "-" + str(now.minute)
     destination = root + "searches/" + modelID + "/"
@@ -392,10 +392,10 @@ def search_parameters(lrs, momentums, neurons, train_labels):
     head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
     spamwriter = csv.writer(csvfile, delimiter=';',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    modelName = "model5"
+    modelName = "model6"
     train_l = 0;
-    train_h = 50;
-    train_batch_size = 10
+    train_h = 6;
+    train_batch_size = 2
     train_batches = train_h / train_batch_size
     # 0:28,000 and 28,000:31,000
     valid_l = 27;
@@ -413,27 +413,28 @@ def search_parameters(lrs, momentums, neurons, train_labels):
     for lr in lrs:
         for m in momentums:
             for n in neurons:
-                model = model5(lr, m, n)
-                train_history = model.fit_generator(
-                    generator=ImageSequence(train_labels[train_l:train_h],
-                                            batch_size=train_batch_size,
-                                            start=train_l),
-                    steps_per_epoch=train_batches,
-                    epochs=5,
-                    validation_data=ImageSequence(train_labels[valid_l:valid_h],
-                                                  batch_size=valid_batch_size,
-                                                  start=valid_l),
-                    validation_steps=valid_batches)
+                for f in filters:
+                    model = model6(lr, m, n, f)
+                    train_history = model.fit_generator(
+                        generator=ImageSequence(train_labels[train_l:train_h],
+                                                batch_size=train_batch_size,
+                                                start=train_l),
+                        steps_per_epoch=train_batches,
+                        epochs=5,
+                        validation_data=ImageSequence(train_labels[valid_l:valid_h],
+                                                      batch_size=valid_batch_size,
+                                                      start=valid_l),
+                        validation_steps=valid_batches)
 
-                losses = train_history.history['loss']
-                val_losses = train_history.history['val_loss']
-                pred_1 = train_history.history['pred_1']
-                act_1 = train_history.history['act_1']
-                print(train_history.history.keys())
-                spamwriter.writerow(["train", lr, m] + losses)
-                spamwriter.writerow(["valid", lr, m] + val_losses)
-                spamwriter.writerow(["pred_1", lr, m] + pred_1)
-                spamwriter.writerow(["act_1", lr, m] + act_1)
+                    losses = train_history.history['loss']
+                    val_losses = train_history.history['val_loss']
+                    pred_1 = train_history.history['pred_1']
+                    act_1 = train_history.history['act_1']
+
+                    spamwriter.writerow(["train", lr, m] + losses)
+                    spamwriter.writerow(["valid", lr, m] + val_losses)
+                    spamwriter.writerow(["pred_1", lr, m] + pred_1)
+                    spamwriter.writerow(["act_1", lr, m] + act_1)
 
     csvfile.close()
 
