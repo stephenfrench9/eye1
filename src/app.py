@@ -415,7 +415,7 @@ def search_parameters(lrs, momentums, neurons, train_labels):
 
 
 def writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
-             modelName):
+             modelName, notes):
 
     head = ['type', 'epoch 1', 'epoch 2', ' ... ']
     spamwriter = csv.writer(csvfile, delimiter=';',
@@ -424,8 +424,14 @@ def writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, 
     spamwriter.writerow(head)
     losses = train_history.history['loss']
     val_losses = train_history.history['val_loss']
+    pred_1 = train_history.history['pred_1']
+    act_1 = train_history.history['act_1']
+
     spamwriter.writerow(["train"] + losses)
     spamwriter.writerow(["valid"] + val_losses)
+    spamwriter.writerow(["pred_1"] + pred_1)
+    spamwriter.writerow(["act_1"] + act_1)
+
     spamwriter.writerow([" ... "])
     spamwriter.writerow(["train",
                          "train_labels: " + str(train_l) + ":" + str(train_h),
@@ -433,10 +439,10 @@ def writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, 
                          "learning rate: " + str(lr),
                          "momentum: " + str(p),
                          "model name: " + modelName])
-
     spamwriter.writerow(["test",
                          "test_labels: " + str(valid_l) + ":" + str(valid_h),
                          "batch_size: " + str(valid_batch_size)])
+    spamwriter.writerow(["notes:"] + notes)
 
 
 if __name__ == "__main__":
@@ -447,7 +453,7 @@ if __name__ == "__main__":
     lr = .1
     p = .1
     modelName = "model5"
-    model = model5(lr, p)
+    model = model5(lr, p, 10)
 
     train_l = 0; train_h = 28000;
     train_batch_size = 2
@@ -461,7 +467,7 @@ if __name__ == "__main__":
                                                                 batch_size=train_batch_size,
                                                                 start=train_l),
                                         steps_per_epoch=train_batches,
-                                        epochs=15,
+                                        epochs=12,
                                         validation_data=ImageSequence(train_labels[valid_l:valid_h],
                                                                       batch_size=valid_batch_size,
                                                                       start=valid_l),
@@ -474,9 +480,10 @@ if __name__ == "__main__":
     if not os.path.isdir(destination):
         os.mkdir(destination)
 
+    notes = ["5th layer neurons: 10"]
     with open(destination + 'eggs.csv', 'w', newline='') as csvfile:
         writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
-                 modelName)
+                 modelName, notes)
 
     with open(destination + "model.json", "w") as json_file:
         json_model = model.to_json()
