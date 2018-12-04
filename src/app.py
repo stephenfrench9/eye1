@@ -262,7 +262,7 @@ def model5(lrp, mp, neurons):
     return model
 
 
-def model6(lrp, mp, filters, neurons):
+def model6(lrp, mp, neurons, filters):
     """only predict one category at a time"""
     ax1range = 512;
     ax2range = 512;
@@ -272,7 +272,7 @@ def model6(lrp, mp, filters, neurons):
     model = Sequential()
     model.add(Conv2D(filters, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
     model.add(MaxPooling2D(pool_size=(10, 10)))
-    model.add(Conv2D(filters, (5, 5), activation='relu'))
+    model.add(Conv2D(2*filters, (5, 5), activation='relu'))
     model.add(MaxPooling2D(pool_size=(10, 10)))
     # model.add(Conv2D(4, (5, 5), activation='relu'))
     # model.add(Dropout(0.25))
@@ -389,18 +389,18 @@ def search_parameters(lrs, momentums, neurons, filters, train_labels):
     if not os.path.isdir(destination):
         os.mkdir(destination)
     csvfile = open(destination + 'eggs.csv', 'w', newline='')
-    head = ['type', 'learning rate', 'momentum', 'epoch 1', 'epoch 2', ' ... ']
+    head = ['type', 'learning rate', 'momentum', 'neurons', 'filers', 'epoch 1', 'epoch 2', ' ... ']
     spamwriter = csv.writer(csvfile, delimiter=';',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
     modelName = "model6"
     train_l = 0;
-    train_h = 6;
-    train_batch_size = 2
+    train_h = 2800;
+    train_batch_size = 10
     train_batches = train_h / train_batch_size
     # 0:28,000 and 28,000:31,000
-    valid_l = 27;
-    valid_h = 35;
-    valid_batch_size = 4  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+    valid_l = train_h;
+    valid_h = 3100;
+    valid_batch_size = 6  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
     valid_batches = (valid_h - valid_l) / valid_batch_size
     spamwriter.writerow(["train_data",
                          "train_labels: " + str(train_l) + ":" + str(train_h),
@@ -420,7 +420,7 @@ def search_parameters(lrs, momentums, neurons, filters, train_labels):
                                                 batch_size=train_batch_size,
                                                 start=train_l),
                         steps_per_epoch=train_batches,
-                        epochs=5,
+                        epochs=4,
                         validation_data=ImageSequence(train_labels[valid_l:valid_h],
                                                       batch_size=valid_batch_size,
                                                       start=valid_l),
@@ -431,10 +431,10 @@ def search_parameters(lrs, momentums, neurons, filters, train_labels):
                     pred_1 = train_history.history['pred_1']
                     act_1 = train_history.history['act_1']
 
-                    spamwriter.writerow(["train", lr, m] + losses)
-                    spamwriter.writerow(["valid", lr, m] + val_losses)
-                    spamwriter.writerow(["pred_1", lr, m] + pred_1)
-                    spamwriter.writerow(["act_1", lr, m] + act_1)
+                    spamwriter.writerow(["train", lr, m, n, f] + losses)
+                    spamwriter.writerow(["valid", lr, m, n, f] + val_losses)
+                    spamwriter.writerow(["pred_1", lr, m, n, f] + pred_1)
+                    spamwriter.writerow(["act_1", lr, m, n, f] + act_1)
 
     csvfile.close()
 

@@ -3,10 +3,10 @@ import app
 if __name__ == "__main__":
     print("search is running")
 
-    lrs = [1]
-    ms = [0]
-    neurons = [5]
-    filters = [10]
+    lrs = [.1 ,1]
+    ms = [0, .5]
+    neurons = [2, 10]
+    filters = [4, 10]
 
     train_labels = app.data()
 
