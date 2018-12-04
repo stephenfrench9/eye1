@@ -138,7 +138,7 @@ class ImageSequence(Sequence):
             g = self.train_labels.ix[sample]
             y[i, :] = np.array(g[2:3])
 
-        x = x[1:, 100:200, 100:200, :]
+        x = x[1:, :, :, :]
         # plt.imsave("/ralston/pictures/blue.png", x[0][:, :, 0])
         # plt.imsave("/ralston/pictures/red.png", x[0][:, :, 1])
         # plt.imsave("/ralston/pictures/yellow.png", x[0][:, :, 2])
@@ -251,6 +251,29 @@ def model5(lrp, mp, neurons):
     model = Sequential()
     model.add(Conv2D(2, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
     model.add(MaxPooling2D(pool_size=(7, 7)))
+    # model.add(Conv2D(4, (5, 5), activation='relu'))
+    # model.add(Dropout(0.25))
+    model.add(Flatten())
+    # model.add(BatchNormalization(axis=1))
+    model.add(Dense(neurons, activation='relu'))
+    model.add(Dense(categories, activation='softmax'))
+    sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer=sgd, metrics=[act_1, pred_1])
+    return model
+
+
+def model6(lrp, mp, filters, neurons):
+    """only predict one category at a time"""
+    ax1range = 512;
+    ax2range = 512;
+    ax3range = 4;
+    categories = 2;
+
+    model = Sequential()
+    model.add(Conv2D(filters, (5, 5), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
+    model.add(MaxPooling2D(pool_size=(10, 10)))
+    model.add(Conv2D(filters, (5, 5), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(10, 10)))
     # model.add(Conv2D(4, (5, 5), activation='relu'))
     # model.add(Dropout(0.25))
     model.add(Flatten())
@@ -406,6 +429,7 @@ def search_parameters(lrs, momentums, neurons, train_labels):
                 val_losses = train_history.history['val_loss']
                 pred_1 = train_history.history['pred_1']
                 act_1 = train_history.history['act_1']
+                print(train_history.history.keys())
                 spamwriter.writerow(["train", lr, m] + losses)
                 spamwriter.writerow(["valid", lr, m] + val_losses)
                 spamwriter.writerow(["pred_1", lr, m] + pred_1)
@@ -433,13 +457,13 @@ def writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, 
     spamwriter.writerow(["act_1"] + act_1)
 
     spamwriter.writerow([" ... "])
-    spamwriter.writerow(["train",
+    spamwriter.writerow(["training",
                          "train_labels: " + str(train_l) + ":" + str(train_h),
                          "batch_size: " + str(train_batch_size),
                          "learning rate: " + str(lr),
                          "momentum: " + str(p),
                          "model name: " + modelName])
-    spamwriter.writerow(["test",
+    spamwriter.writerow(["testing",
                          "test_labels: " + str(valid_l) + ":" + str(valid_h),
                          "batch_size: " + str(valid_batch_size)])
     spamwriter.writerow(["notes:"] + notes)
@@ -452,15 +476,22 @@ if __name__ == "__main__":
     # train a model
     lr = .1
     p = .1
-    modelName = "model5"
-    model = model5(lr, p, 10)
+    neurons = 5
+    filters = 10
 
-    train_l = 0; train_h = 28000;
-    train_batch_size = 2
+
+
+    modelName = "model6"
+    model = model6(lr, p, filters, neurons)
+
+    print(model.summary())
+
+    train_l = 0; train_h = 500;
+    train_batch_size = 20
     train_batches = train_h/train_batch_size
 
-    valid_l = 28000; valid_h = 31000;
-    valid_batch_size = 2 # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+    valid_l = train_h; valid_h = 600;
+    valid_batch_size = 5 # valid_batch_size =10 and valid_batches = 1 does not work ... cra
     valid_batches = (valid_h-valid_l)/valid_batch_size
 
     train_history = model.fit_generator(generator=ImageSequence(train_labels[train_l:train_h],
