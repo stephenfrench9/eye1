@@ -5,13 +5,13 @@ import numpy as np
 
 if __name__ == '__main__':
     root = "/ralston/"
-    searchOfInterest = "github1/"
+    searchOfInterest = "4-22-46-30/"
 
     csv_file = open(root + "searches/" + searchOfInterest + "eggs.csv", 'r', newline='')
 
     reader = csv.reader(csv_file, delimiter=";")
 
-    beginSeq = 3
+    beginSeq = 5
     modelName = "initialization"
     j = 0
     for row in reader:
@@ -34,12 +34,12 @@ if __name__ == '__main__':
                 plt.plot([float(i) for i in row[beginSeq:]], "g")
             elif row[0] == "act_1":
                 plt.plot([float(i) for i in row[beginSeq:]], "y")
-            if row[0] == "valid":
+            if row[0] == "act_1":
                 plt.title(modelName + " - " +
                           "lr: " + row[1] +
                           ", momentum: " + row[2] +
-                          # ", neurons: " + row[3] +
-                          # ", filters: " + row[4] +
+                          ", neurons: " + row[3] +
+                          ", filters: " + row[4] +
                           "\n pred_1 = green, act_1 = yellow")
                 plt.xlabel("epoch -- train = red, validation = blue")
                 plt.ylabel("loss, %")
