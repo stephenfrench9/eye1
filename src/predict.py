@@ -6,8 +6,8 @@ import os
 
 
 if __name__ == "__main__":
-    modelOfInterest = "4-18-36/"
-    root = "/ralston/"
+    modelOfInterest = "5-20-35-39/"
+    root = "./"
 
     model = app.load_model(modelOfInterest)
 
@@ -27,7 +27,7 @@ if __name__ == "__main__":
     batch_size = 10
 
     while currentGroup < numGroups:
-        print("start of the batch: " + str(currentGroup))
+        print("start of group: " + str(currentGroup))
         x = np.ones((1, 512, 512, 4))
         trials = []
         while x.shape[0] - 1 < batch_size and currentGroup < numGroups:

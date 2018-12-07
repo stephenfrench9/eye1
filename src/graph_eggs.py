@@ -2,7 +2,7 @@ import csv
 import matplotlib.pyplot as plt
 if __name__ == '__main__':
     root = "./"
-    model_of_interest = "5-20-35-39/"
+    model_of_interest = "6-19-39-43/"
 
     print("graph eggs is running")
 
@@ -10,16 +10,17 @@ if __name__ == '__main__':
         rows = csv.reader(f, delimiter=';')
         for row in rows:
             x = [i+1 for i in range(len(row[1:]))]
+
             if row[0] == "train":
                 plt.plot(x, [float(i)/float(row[1]) for i in row[1:]], 'r')
             elif row[0] == "valid":
-                plt.plot([1, 2, 3, 4, 5], [float(i)/float(row[1]) for i in row[1:]], 'b')
+                plt.plot(x, [float(i)/float(row[1]) for i in row[1:]], 'b')
             elif row[0] == "pred_1":
-                plt.plot([1, 2, 3, 4, 5], [float(i) for i in row[1:]], 'y')
+                plt.plot(x, [float(i) for i in row[1:]], 'y')
             elif row[0] == "act_1":
-                plt.plot([1, 2, 3, 4, 5], [float(i) for i in row[1:]], 'g')
+                plt.plot(x, [float(i) for i in row[1:]], 'g')
             plt.ylabel("normalized loss")
             plt.xlabel("epoch : train=red, validation=blue, pred_yes=yellow, act_yes=g")
-            plt.xticks([1, 2, 3, 4, 5])
-            plt.title("model 6 (5-20-35-39)\nlr=.1, m=0, N=10,f=10")
+            # plt.xticks(x)
+            plt.title("model 6 (" + model_of_interest + ")\nlr=.1, m=0, N=10,f=10")
             plt.savefig(root + "models/" + model_of_interest + "eggs.png")

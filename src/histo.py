@@ -9,8 +9,8 @@ import app
 
 
 if __name__ == "__main__":
-    root = "/ralston/"
-    model_of_interest = "4-18-36/"
+    root = "./"
+    model_of_interest = "5-20-35-39/"
     model = app.load_model(model_of_interest)
 
 
@@ -34,6 +34,6 @@ if __name__ == "__main__":
     plt.xlabel("min=" + str(min) + ",max=" + str(max))
     plt.ylim([0, 200])
     plt.savefig(root + "models/" + model_of_interest + "weight_distribution.png")
-    plot_model(model, to_file=root + "models/" + model_of_interest + "model_arch.png")
+    # plot_model(model, to_file=root + "models/" + model_of_interest + "model_arch.png")
 
 

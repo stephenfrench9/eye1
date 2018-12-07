@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import warnings
 
+from keras.regularizers import l2
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
 from keras.models import Sequential, model_from_json
@@ -285,6 +286,29 @@ def model6(lrp, mp, neurons, filters):
     return model
 
 
+def model7(lrp, mp, neurons, filters):
+    """only predict one category at a time"""
+    ax1range = 512;
+    ax2range = 512;
+    ax3range = 4;
+    categories = 2;
+
+    model = Sequential()
+    model.add(Conv2D(filters, (5, 5), kernel_regularizer=l2(.01), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
+    model.add(MaxPooling2D(pool_size=(10, 10)))
+    model.add(Conv2D(2*filters, (5, 5), kernel_regularizer=l2(.01), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(10, 10)))
+    # model.add(Conv2D(4, (5, 5), activation='relu'))
+    # model.add(Dropout(0.25))
+    model.add(Flatten())
+    # model.add(BatchNormalization(axis=1))
+    model.add(Dense(neurons, kernel_regularizer=l2(.01), activation='relu'))
+    model.add(Dense(categories, kernel_regularizer=l2(.01), activation='softmax'))
+    sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=[act_1, pred_1])
+    return model
+
+
 def load_model(model):
     """
     :return: a model
@@ -480,8 +504,8 @@ if __name__ == "__main__":
     neurons = 10
     filter = 10
 
-    modelName = "model6"
-    model = model6(lr, 0, neurons, filter)
+    modelName = "model7"
+    model = model7(lr, 0, neurons, filter)
 
     print(model.summary())
 
@@ -497,7 +521,7 @@ if __name__ == "__main__":
                                                                 batch_size=train_batch_size,
                                                                 start=train_l),
                                         steps_per_epoch=train_batches,
-                                        epochs=12,
+                                        epochs=2,
                                         validation_data=ImageSequence(train_labels[valid_l:valid_h],
                                                                       batch_size=valid_batch_size,
                                                                       start=valid_l),
@@ -510,7 +534,7 @@ if __name__ == "__main__":
     if not os.path.isdir(destination):
         os.mkdir(destination)
 
-    notes = ["notes: " + "none"]
+    notes = ["notes: ", "N=10", "f=10", "adam", "l2=.01"]
     with open(destination + 'eggs.csv', 'w', newline='') as csvfile:
         writeCsv(csvfile, train_history, lr, m, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
                  modelName, notes)
