@@ -35,7 +35,7 @@ Below are what the typical results looked like for most of the search space.
 
 <img src="/readmePics/model6_typical.png" alt=".." width="350"/>
 
-
+With the above results in mind, I train a model with hyperparameters learning rate=.1, momentum=0, N=10, f=10. The precision for this model was .92, while the recall was .68. The losses as a function of training epoch are depicted below. 
  
 
 

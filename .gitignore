@@ -1,6 +1,6 @@
 test/*
 train/*
-
+venv/
 /mnist
 poorlyTrained
 *idea*

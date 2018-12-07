@@ -18,7 +18,7 @@ from skimage.io import imread
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-root = "/ralston/"
+root = "./"
 
 
 def data():
@@ -119,17 +119,17 @@ class ImageSequence(Sequence):
     def __getitem__(self, idx):
         trials = len(self.train_labels)
         y = np.ones((self.batch_size, 1))
-        x = np.ones((1, 100, 100, 4))
+        x = np.ones((1, 512, 512, 4))
 
         # y = to_cate
 
         # x = np.ones((1, 512, 512))
         for i in range(self.batch_size):
             sample = self.start + i + idx * self.batch_size
-            b = imread(self.base + self.train_labels.at[sample, 'Id'] + self.red).reshape((512, 512, 1))[100:200, 100:200, :]
-            r = imread(self.base + self.train_labels.at[sample, 'Id'] + self.blue).reshape((512, 512, 1))[100:200, 100:200, :]
-            ye = imread(self.base + self.train_labels.at[sample, 'Id'] + self.yellow).reshape((512, 512, 1))[100:200, 100:200, :]
-            g = imread(self.base + self.train_labels.at[sample, 'Id'] + self.green).reshape((512, 512, 1))[100:200, 100:200, :]
+            b = imread(self.base + self.train_labels.at[sample, 'Id'] + self.red).reshape((512, 512, 1))
+            r = imread(self.base + self.train_labels.at[sample, 'Id'] + self.blue).reshape((512, 512, 1))
+            ye = imread(self.base + self.train_labels.at[sample, 'Id'] + self.yellow).reshape((512, 512, 1))
+            g = imread(self.base + self.train_labels.at[sample, 'Id'] + self.green).reshape((512, 512, 1))
             im = np.append(b, r, axis=2)
             im = np.append(im, ye, axis=2)
             im = np.append(im, g, axis=2)
@@ -478,18 +478,19 @@ if __name__ == "__main__":
     lr = .1
     m = 0
     neurons = 10
+    filter = 10
 
-    modelName = "model5"
-    model = model5(lr, 0, neurons)
+    modelName = "model6"
+    model = model6(lr, 0, neurons, filter)
 
     print(model.summary())
 
     train_l = 0; train_h = 28000;
-    train_batch_size = 2
+    train_batch_size = 10
     train_batches = train_h/train_batch_size
 
     valid_l = train_h; valid_h = 31000;
-    valid_batch_size = 2 # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+    valid_batch_size = 5 # valid_batch_size =10 and valid_batches = 1 does not work ... cra
     valid_batches = (valid_h-valid_l)/valid_batch_size
 
     train_history = model.fit_generator(generator=ImageSequence(train_labels[train_l:train_h],
@@ -509,7 +510,7 @@ if __name__ == "__main__":
     if not os.path.isdir(destination):
         os.mkdir(destination)
 
-    notes = ["5th layer neurons: " + str(neurons)]
+    notes = ["notes: " + "none"]
     with open(destination + 'eggs.csv', 'w', newline='') as csvfile:
         writeCsv(csvfile, train_history, lr, m, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
                  modelName, notes)
