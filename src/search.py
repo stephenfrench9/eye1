@@ -3,11 +3,11 @@ import app
 if __name__ == "__main__":
     print("search is running")
 
-    lrs = [.1 ,1]
-    ms = [0, .5]
-    neurons = [2, 10]
-    filters = [4, 10]
+    lrs = [.01, .1, 1]
+    beta1s = [.8, .9]
+    beta2s = [.999]
+    epsilons = [.1, 1]
 
     train_labels = app.data()
 
-    app.search_parameters(lrs, ms, neurons, filters, train_labels=train_labels)
+    app.search_parameters(lrs, beta1s, beta2s, epsilons, train_labels=train_labels)

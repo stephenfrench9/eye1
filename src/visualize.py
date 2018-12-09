@@ -4,8 +4,8 @@ import numpy as np
 
 
 if __name__ == '__main__':
-    root = "/ralston/"
-    searchOfInterest = "4-22-46-30/"
+    root = "./"
+    searchOfInterest = "8-16-19-18/"
 
     csv_file = open(root + "searches/" + searchOfInterest + "eggs.csv", 'r', newline='')
 
@@ -37,13 +37,13 @@ if __name__ == '__main__':
             if row[0] == "act_1":
                 plt.title(modelName + " - " +
                           "lr: " + row[1] +
-                          ", momentum: " + row[2] +
-                          ", neurons: " + row[3] +
-                          ", filters: " + row[4] +
+                          ", beta1: " + row[2] +
+                          ", beta2: " + row[3] +
+                          ", epsilon: " + row[4] +
                           "\n pred_1 = green, act_1 = yellow")
                 plt.xlabel("epoch -- train = red, validation = blue")
                 plt.ylabel("loss, %")
-                plt.ylim([.2, 1.2])
+                plt.ylim([.3, 1.1])
                 plt.savefig(root + "pictures/" + str(j) + ".png")
                 plt.clf()
         j += 1

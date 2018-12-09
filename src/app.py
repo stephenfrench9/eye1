@@ -12,7 +12,7 @@ from keras.regularizers import l2
 from keras.layers import Dense, Dropout, Flatten
 from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
 from keras.models import Sequential, model_from_json
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adam
 from keras.utils import Sequence
 from scipy.misc import imread
 from skimage.io import imread
@@ -286,7 +286,7 @@ def model6(lrp, mp, neurons, filters):
     return model
 
 
-def model7(lrp, mp, neurons, filters):
+def model7(lr, mp, neurons, filters):
     """only predict one category at a time"""
     ax1range = 512;
     ax2range = 512;
@@ -304,8 +304,35 @@ def model7(lrp, mp, neurons, filters):
     # model.add(BatchNormalization(axis=1))
     model.add(Dense(neurons, kernel_regularizer=l2(.01), activation='relu'))
     model.add(Dense(categories, kernel_regularizer=l2(.01), activation='softmax'))
-    sgd = SGD(lr=lrp, decay=1e-6, momentum=mp, nesterov=True)
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=[act_1, pred_1])
+
+    adam = Adam() # use all default values.
+    model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=[act_1, pred_1])
+    return model
+
+
+def model8(lr, beta1, beta2, epsilon):
+    """only predict one category at a time"""
+    neurons = 10;
+    filters = 10;
+    ax1range = 512;
+    ax2range = 512;
+    ax3range = 4;
+    categories = 2;
+
+    model = Sequential()
+    model.add(Conv2D(filters, (5, 5), kernel_regularizer=l2(.01), activation='relu', input_shape=(ax1range, ax2range, ax3range)))
+    model.add(MaxPooling2D(pool_size=(10, 10)))
+    model.add(Conv2D(2*filters, (5, 5), kernel_regularizer=l2(.01), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(10, 10)))
+    # model.add(Conv2D(4, (5, 5), activation='relu'))
+    # model.add(Dropout(0.25))
+    model.add(Flatten())
+    # model.add(BatchNormalization(axis=1))
+    model.add(Dense(neurons, kernel_regularizer=l2(.01), activation='relu'))
+    model.add(Dense(categories, kernel_regularizer=l2(.01), activation='softmax'))
+
+    adam = Adam(lr=lr, beta_1=beta1, beta_2=beta2, epsilon=epsilon)
+    model.compile(loss='categorical_crossentropy', optimizer=adam, metrics=[act_1, pred_1])
     return model
 
 
@@ -406,7 +433,7 @@ def precisionMetric(y_true, y_pred):
     return precision
 
 
-def search_parameters(lrs, momentums, neurons, filters, train_labels):
+def search_parameters(lrs, beta1s, beta2s, epsilons, train_labels):
     now = datetime.datetime.now()
     modelID = str(now.day) + "-" + str(now.hour) + "-" + str(now.minute) + "-" + str(now.second)
     destination = root + "searches/" + modelID + "/"
@@ -416,15 +443,15 @@ def search_parameters(lrs, momentums, neurons, filters, train_labels):
     head = ['type', 'learning rate', 'momentum', 'neurons', 'filers', 'epoch 1', 'epoch 2', ' ... ']
     spamwriter = csv.writer(csvfile, delimiter=';',
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    modelName = "model6"
+    modelName = "model8"
     train_l = 0;
-    train_h = 2800;
+    train_h = 30;
     train_batch_size = 10
     train_batches = train_h / train_batch_size
     # 0:28,000 and 28,000:31,000
     valid_l = train_h;
-    valid_h = 3100;
-    valid_batch_size = 6  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+    valid_h = 40;
+    valid_batch_size = 2  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
     valid_batches = (valid_h - valid_l) / valid_batch_size
     spamwriter.writerow(["train_data",
                          "train_labels: " + str(train_l) + ":" + str(train_h),
@@ -435,16 +462,16 @@ def search_parameters(lrs, momentums, neurons, filters, train_labels):
                          "batch_size: " + str(valid_batch_size)])
     spamwriter.writerow(head)
     for lr in lrs:
-        for m in momentums:
-            for n in neurons:
-                for f in filters:
-                    model = model6(lr, m, n, f)
+        for beta1 in beta1s:
+            for beta2 in beta2s:
+                for e in epsilons:
+                    model = model7(lr, beta1, beta2, e)
                     train_history = model.fit_generator(
                         generator=ImageSequence(train_labels[train_l:train_h],
                                                 batch_size=train_batch_size,
                                                 start=train_l),
                         steps_per_epoch=train_batches,
-                        epochs=4,
+                        epochs=2,
                         validation_data=ImageSequence(train_labels[valid_l:valid_h],
                                                       batch_size=valid_batch_size,
                                                       start=valid_l),
@@ -455,10 +482,10 @@ def search_parameters(lrs, momentums, neurons, filters, train_labels):
                     pred_1 = train_history.history['pred_1']
                     act_1 = train_history.history['act_1']
 
-                    spamwriter.writerow(["train", lr, m, n, f] + losses)
-                    spamwriter.writerow(["valid", lr, m, n, f] + val_losses)
-                    spamwriter.writerow(["pred_1", lr, m, n, f] + pred_1)
-                    spamwriter.writerow(["act_1", lr, m, n, f] + act_1)
+                    spamwriter.writerow(["train", lr, beta1, beta2, e] + losses)
+                    spamwriter.writerow(["valid", lr, beta1, beta2, e] + val_losses)
+                    spamwriter.writerow(["pred_1", lr, beta1, beta2, e] + pred_1)
+                    spamwriter.writerow(["act_1", lr, beta1, beta2, e] + act_1)
 
     csvfile.close()
 
@@ -521,7 +548,7 @@ if __name__ == "__main__":
                                                                 batch_size=train_batch_size,
                                                                 start=train_l),
                                         steps_per_epoch=train_batches,
-                                        epochs=2,
+                                        epochs=12,
                                         validation_data=ImageSequence(train_labels[valid_l:valid_h],
                                                                       batch_size=valid_batch_size,
                                                                       start=valid_l),

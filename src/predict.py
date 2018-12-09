@@ -6,7 +6,7 @@ import os
 
 
 if __name__ == "__main__":
-    modelOfInterest = "5-20-35-39/"
+    modelOfInterest = "7-11-46-35/"
     root = "./"
 
     model = app.load_model(modelOfInterest)

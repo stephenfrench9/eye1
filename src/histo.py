@@ -10,7 +10,7 @@ import app
 
 if __name__ == "__main__":
     root = "./"
-    model_of_interest = "5-20-35-39/"
+    model_of_interest = "7-11-46-35/"
     model = app.load_model(model_of_interest)
 
 

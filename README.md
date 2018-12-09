@@ -35,7 +35,38 @@ Below are what the typical results looked like for most of the search space.
 
 <img src="/readmePics/model6_typical.png" alt=".." width="350"/>
 
-With the above results in mind, I train a model with hyperparameters learning rate=.1, momentum=0, N=10, f=10. The precision for this model was .92, while the recall was .68. The losses as a function of training epoch are depicted below. 
+With the above results in mind, I train a model to 5 epochs with hyperparameters learning rate=.1, momentum=0, N=10, f=10. The precision for this model was .92, while the recall was .68. The losses as a function of training epoch are depicted below. 
  
+<img src="/readmePics/model6epochs5.png" alt=".." width="350"/>
+
+It is arguable that this model is doing nothing more than drawing from a bernoulli distribution with p = .46
+
+The same model was also trained to 12 epochs, producing precision=.85 and recall=.80. Its training and validation loss as a function of epoch are given below. We do not see the signature shape of generalized learning - our validation curve is rather flat with no minimum. The training loss continues to improve, fitting the data in a way that will not generalize. 
+
+<img src="/readmePics/model6epochs12.png" alt=".." width="350"/>
+
+We next switch optimizers, from keras's 'sgd' to 'adam', as well as add regularization. This is known as model7. The architecture is the same as model6 and we conduct a search of N = [2, 10] and filters = [4, 10]. For rigor, we train four networks for each combination of hyperparamters. We find that a some set of hyperparamters give variable performance, and the the exact same shape curves are never observed. None of these results are particularly enticing. Below are a couple results. We see that 10 neurons in the final layer with four filters performs the most reliably. Two neurons in the final layer leads to an untrainable model. I conjecture that the number of neurons in the final layer must be larger for larger numbers of filters, and that if I increased the final layer neurons, I would get a better performance for 10 filters. Just a conjecture though.
+
+10 neurons, 4 filters:
+
+<img src="/readmePics/model7Search/10-4_1.png" alt=".." width="350"/> <img src="/readmePics/model7Search/10-4_2.png" alt=".." width="350"/>
+<img src="/readmePics/model7Search/10-4_3.png" alt=".." width="350"/> <img src="/readmePics/model7Search/10-4_4.png" alt=".." width="350"/>
+
+10 neurons, 10 filters:
+
+<img src="/readmePics/model7Search/10-10_1.png" alt=".." width="350"/> <img src="/readmePics/model7Search/10-10_2.png" alt=".." width="350"/>
+<img src="/readmePics/model7Search/10-10_3.png" alt=".." width="350"/> <img src="/readmePics/model7Search/10-10_4.png" alt=".." width="350"/>
+
+2 neurons, 4 filters:
+
+<img src="/readmePics/model7Search/2-10_1.png" alt=".." width="350"/> <img src="/readmePics/model7Search/2-10_2.png" alt=".." width="350"/>
+<img src="/readmePics/model7Search/2-10_3.png" alt=".." width="350"/> <img src="/readmePics/model7Search/2-10_4.png" alt=".." width="350"/>
+
+2 neurons, 10 filters:
+
+<img src="/readmePics/model7Search/2-10_1.png" alt=".." width="350"/> <img src="/readmePics/model7Search/2-10_2.png" alt=".." width="350"/>
+<img src="/readmePics/model7Search/2-10_3.png" alt=".." width="350"/> <img src="/readmePics/model7Search/2-10_4.png" alt=".." width="350"/>
+
+We now attempt another search, except this time we set the architecture of the network with N=10 and f=10, as those numbers seem to have performed well in the last search. We search over the paramters alpha (learning rate) = [.01, .1, 1], beta1=[.8, .9], beta2=[.999], epsilon=[.1, 1]. 
 
 
