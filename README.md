@@ -2,7 +2,7 @@
 
 ## Cytoplasm, label 0
 
-### The first model is a neural network with the following layers:
+### Model 5
 
 input layer: dimension is 100x100x3
 first layer: convolution - 2 5x5 filters and a relu activation
@@ -11,6 +11,7 @@ third layer: flatten layer
 fourth layer: Dense layer, with 10 or 100 neurons and relu activation
 fifth layer: Dense output layer, with softmax activation
 
+### search
 I searched over learning rate=[.1, 1, 10], momentum=[0, .9], and fifth layer neurons=[10, 100] with 10% of the training data.
 The results were not very sensitive to fifth layer neuron count. All combinations of learning rate
 and momentum lead to no improvements in training or testing loss, except for lr=.1 and momentum=0.
@@ -21,10 +22,13 @@ Figures 1 through 4 below show results.
 
 Conclusion: model5, lr=.1, m=0, and fifth layer neurons=10 might be able to pick up a general pattern if I train it on more of the data
 
+### train
+
 Training this model with the above set of optimal training paramters does not give successful results. The training and validation losses during the training session are given below, as well as its precision and recall. 
 
 
-### The next model to consider has the following layers
+## Model 6
+### search 
 
 input layer: dimension is 512x512X3
 The following layers are: convolution(f), pooling, convolution(2f), pooling, flatten, dense(N), dense(2) where f is the number of filters in the given layer and N is the number of neurons. A search was conducted over the hyperparameters learning rate=[.1, 1], momentum=[0, .5], N=[2, 10], and f=[4,10]. The best results were for learning rate=.1, momentum=0, N=4, and f=10. Below the training and validation loss as well as the frequency of predicted 1's and actual 1's (presence of cyctoplasm=1) are given for the best hyperparameter sets.
@@ -35,6 +39,8 @@ Below are what the typical results looked like for most of the search space.
 
 <img src="/readmePics/model6_typical.png" alt=".." width="350"/>
 
+### train
+
 With the above results in mind, I train a model to 5 epochs with hyperparameters learning rate=.1, momentum=0, N=10, f=10. The precision for this model was .92, while the recall was .68. The losses as a function of training epoch are depicted below. 
  
 <img src="/readmePics/model6epochs5.png" alt=".." width="350"/>
@@ -44,6 +50,9 @@ It is arguable that this model is doing nothing more than drawing from a bernoul
 The same model was also trained to 12 epochs, producing precision=.85 and recall=.80. Its training and validation loss as a function of epoch are given below. We do not see the signature shape of generalized learning - our validation curve is rather flat with no minimum. The training loss continues to improve, fitting the data in a way that will not generalize. 
 
 <img src="/readmePics/model6epochs12.png" alt=".." width="350"/>
+
+## Model 7
+### search
 
 We next switch optimizers, from keras's 'sgd' to 'adam', as well as add regularization. This is known as model7. The architecture is the same as model6 and we conduct a search of N = [2, 10] and filters = [4, 10]. For rigor, we train four networks for each combination of hyperparamters. We find that a some set of hyperparamters give variable performance, and the the exact same shape curves are never observed. None of these results are particularly enticing. Below are a couple results. We see that 10 neurons in the final layer with four filters performs the most reliably. Two neurons in the final layer leads to an untrainable model. I conjecture that the number of neurons in the final layer must be larger for larger numbers of filters, and that if I increased the final layer neurons, I would get a better performance for 10 filters. Just a conjecture though.
 
@@ -69,4 +78,9 @@ We next switch optimizers, from keras's 'sgd' to 'adam', as well as add regulari
 
 We now attempt another search, except this time we set the architecture of the network with N=10 and f=10, as those numbers seem to have performed well in the last search. We search over the paramters alpha (learning rate) = [.01, .1, 1], beta1=[.8, .9], beta2=[.999], epsilon=[.1, 1]. 
 
+## Model 8
+### search
+We now attempt another search, except this time we set the architecture of the network with N=10 and f=10, as those numbers seem to have performed well in the model 7 search. We search over the paramters alpha (learning rate) = [.01, .1, 1], beta1=[.8, .9], beta2=[.999], epsilon=[.1, 1].
 
+
+### train 
