@@ -445,13 +445,13 @@ def search_parameters(lrs, beta1s, beta2s, epsilons, train_labels):
                             quotechar='"', quoting=csv.QUOTE_MINIMAL)
     modelName = "model8"
     train_l = 0;
-    train_h = 30;
+    train_h = 2800;
     train_batch_size = 10
     train_batches = train_h / train_batch_size
     # 0:28,000 and 28,000:31,000
     valid_l = train_h;
-    valid_h = 40;
-    valid_batch_size = 2  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
+    valid_h = 3100;
+    valid_batch_size = 5  # valid_batch_size =10 and valid_batches = 1 does not work ... cra
     valid_batches = (valid_h - valid_l) / valid_batch_size
     spamwriter.writerow(["train_data",
                          "train_labels: " + str(train_l) + ":" + str(train_h),
@@ -465,13 +465,13 @@ def search_parameters(lrs, beta1s, beta2s, epsilons, train_labels):
         for beta1 in beta1s:
             for beta2 in beta2s:
                 for e in epsilons:
-                    model = model7(lr, beta1, beta2, e)
+                    model = model8(lr, beta1, beta2, e)
                     train_history = model.fit_generator(
                         generator=ImageSequence(train_labels[train_l:train_h],
                                                 batch_size=train_batch_size,
                                                 start=train_l),
                         steps_per_epoch=train_batches,
-                        epochs=2,
+                        epochs=4,
                         validation_data=ImageSequence(train_labels[valid_l:valid_h],
                                                       batch_size=valid_batch_size,
                                                       start=valid_l),
