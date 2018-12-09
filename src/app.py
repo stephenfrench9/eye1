@@ -490,7 +490,7 @@ def search_parameters(lrs, beta1s, beta2s, epsilons, train_labels):
     csvfile.close()
 
 
-def writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
+def writeCsv(csvfile, train_history, lr, beta1, beta2, epsilon, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
              modelName, notes):
 
     head = ['type', 'epoch 1', 'epoch 2', ' ... ']
@@ -509,16 +509,34 @@ def writeCsv(csvfile, train_history, lr, p, train_l, train_h, train_batch_size, 
     spamwriter.writerow(["act_1"] + act_1)
 
     spamwriter.writerow([" ... "])
-    spamwriter.writerow(["training",
-                         "train_labels: " + str(train_l) + ":" + str(train_h),
-                         "batch_size: " + str(train_batch_size),
-                         "learning rate: " + str(lr),
-                         "momentum: " + str(p),
-                         "model name: " + modelName])
-    spamwriter.writerow(["testing",
-                         "test_labels: " + str(valid_l) + ":" + str(valid_h),
-                         "batch_size: " + str(valid_batch_size)])
-    spamwriter.writerow(["notes:"] + notes)
+
+    spamwriter.writerow(["training_header",
+                         "train_labels_low",
+                         "train_labels_high",
+                         "batch_size",
+                         "learning rate",
+                         "beta1",
+                         "beta2",
+                         "epsilon",
+                         "model name"])
+    spamwriter.writerow(["training_values",
+                         str(train_l),
+                         str(train_h),
+                         str(train_batch_size),
+                         str(lr),
+                         str(beta1),
+                         str(beta2),
+                         str(epsilon),
+                         modelName])
+    spamwriter.writerow(["testing_header",
+                         "test_labels_low",
+                         "test_labels_high",
+                         "testing_batch_size"])
+    spamwriter.writerow(["testing_values",
+                         str(valid_l),
+                         str(valid_h),
+                         str(valid_batch_size)])
+    spamwriter.writerow(["notes"] + notes)
 
 
 if __name__ == "__main__":
@@ -526,13 +544,12 @@ if __name__ == "__main__":
     train_labels = data()
 
     # train a model
+    modelName = "model8"
     lr = .1
-    m = 0
-    neurons = 10
-    filter = 10
-
-    modelName = "model7"
-    model = model7(lr, 0, neurons, filter)
+    beta1 = .8
+    beta2 = .999
+    epsilon = 1
+    model = model8(lr, beta1, beta2, epsilon)
 
     print(model.summary())
 
@@ -561,9 +578,9 @@ if __name__ == "__main__":
     if not os.path.isdir(destination):
         os.mkdir(destination)
 
-    notes = ["notes: ", "N=10", "f=10", "adam", "l2=.01"]
+    notes = ["trained on my mac", "December 9 2018"]
     with open(destination + 'eggs.csv', 'w', newline='') as csvfile:
-        writeCsv(csvfile, train_history, lr, m, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
+        writeCsv(csvfile, train_history, lr, beta1, beta2, epsilon, train_l, train_h, train_batch_size, valid_l, valid_h, valid_batch_size,
                  modelName, notes)
 
     with open(destination + "model.json", "w") as json_file:
