@@ -64,8 +64,8 @@ We next switch optimizers, from keras's 'sgd' to 'adam', as well as add regulari
 
 2 neurons, 10 filters:
 
-<img src="/readmePics/model7Search/2-10_1.png" alt=".." width="350"/> <img src="/readmePics/model7Search/2-10_2.png" alt=".." width="350"/>
-<img src="/readmePics/model7Search/2-10_3.png" alt=".." width="350"/> <img src="/readmePics/model7Search/2-10_4.png" alt=".." width="350"/>
+<img src="/readmePics/model7Search/2-4_1.png" alt=".." width="350"/> <img src="/readmePics/model7Search/2-4_2.png" alt=".." width="350"/>
+<img src="/readmePics/model7Search/2-4_3.png" alt=".." width="350"/> <img src="/readmePics/model7Search/2-4_4.png" alt=".." width="350"/>
 
 We now attempt another search, except this time we set the architecture of the network with N=10 and f=10, as those numbers seem to have performed well in the last search. We search over the paramters alpha (learning rate) = [.01, .1, 1], beta1=[.8, .9], beta2=[.999], epsilon=[.1, 1]. 
 

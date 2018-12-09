@@ -5,7 +5,7 @@ import numpy as np
 
 if __name__ == '__main__':
     root = "./"
-    searchOfInterest = "8-16-19-18/"
+    searchOfInterest = "7-21-30-5/"
 
     csv_file = open(root + "searches/" + searchOfInterest + "eggs.csv", 'r', newline='')
 
@@ -36,10 +36,10 @@ if __name__ == '__main__':
                 plt.plot([float(i) for i in row[beginSeq:]], "y")
             if row[0] == "act_1":
                 plt.title(modelName + " - " +
-                          "lr: " + row[1] +
-                          ", beta1: " + row[2] +
-                          ", beta2: " + row[3] +
-                          ", epsilon: " + row[4] +
+                          # "lr: " + row[1] +
+                          # ", momentum: " + row[2] +
+                          ", neurons: " + row[3] +
+                          ", filters: " + row[4] +
                           "\n pred_1 = green, act_1 = yellow")
                 plt.xlabel("epoch -- train = red, validation = blue")
                 plt.ylabel("loss, %")
