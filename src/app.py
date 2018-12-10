@@ -511,23 +511,23 @@ def writeCsv(csvfile, train_history, lr, beta1, beta2, epsilon, train_l, train_h
     spamwriter.writerow([" ... "])
 
     spamwriter.writerow(["training_header",
+                         "model name",
                          "train_labels_low",
                          "train_labels_high",
                          "batch_size",
                          "learning rate",
                          "beta1",
                          "beta2",
-                         "epsilon",
-                         "model name"])
+                         "epsilon"])
     spamwriter.writerow(["training_values",
+                         modelName,
                          str(train_l),
                          str(train_h),
                          str(train_batch_size),
                          str(lr),
                          str(beta1),
                          str(beta2),
-                         str(epsilon),
-                         modelName])
+                         str(epsilon)])
     spamwriter.writerow(["testing_header",
                          "test_labels_low",
                          "test_labels_high",

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 if __name__ == '__main__':
     root = "./"
 
-    model_of_interest = "9-12-14-55/"
+    model_of_interest = "9-16-16-57/"
 
 
     print("graph eggs is running")
