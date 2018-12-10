@@ -87,14 +87,17 @@ Sadly, our model fails to achieve any predictive power.
 We now attempt another search, except this time we set the architecture of the network with N=10 and f=10, as those numbers seem to have performed well in the model 7 search. We search over the paramters associated with the adam optimizer: alpha (learning rate) = [.01, .1, 1], beta1=[.8, .9], beta2=[.999], epsilon=[.1, 1].
 
 The results for learning rate = .01 are:
+
 <img src="/readmePics/model8Search/01-1.png" alt=".." width="350"/> <img src="/readmePics/model8Search/01-2.png" alt=".." width="350"/>
 <img src="/readmePics/model8Search/01-3.png" alt=".." width="350"/> <img src="/readmePics/model8Search/01-4.png" alt=".." width="350"/>
 
 The results for learning rate = .1 are:
+
 <img src="/readmePics/model8Search/1-1.png" alt=".." width="350"/> <img src="/readmePics/model8Search/1-2.png" alt=".." width="350"/>
 <img src="/readmePics/model8Search/1-3.png" alt=".." width="350"/> <img src="/readmePics/model8Search/1-4.png" alt=".." width="350"/>
 
 The results for learning rate = 1 are:
+
 <img src="/readmePics/model8Search/10-1.png" alt=".." width="350"/> <img src="/readmePics/model8Search/10-2.png" alt=".." width="350"/>
 <img src="/readmePics/model8Search/10-3.png" alt=".." width="350"/> <img src="/readmePics/model8Search/10-4.png" alt=".." width="350"/>
 
