@@ -88,15 +88,15 @@ We now attempt another search, except this time we set the architecture of the n
 
 The results for learning rate = .01 are:
 <img src="/readmePics/model8Search/01-1.png" alt=".." width="350"/> <img src="/readmePics/model8Search/01-2.png" alt=".." width="350"/>
-<img src="/readmePics/model7Search/01-3.png" alt=".." width="350"/> <img src="/readmePics/model7Search/01-4.png" alt=".." width="350"/>
+<img src="/readmePics/model8Search/01-3.png" alt=".." width="350"/> <img src="/readmePics/model8Search/01-4.png" alt=".." width="350"/>
 
 The results for learning rate = .1 are:
-<img src="/readmePics/model7Search/1-1.png" alt=".." width="350"/> <img src="/readmePics/model7Search/1-2.png" alt=".." width="350"/>
-<img src="/readmePics/model7Search/1-3.png" alt=".." width="350"/> <img src="/readmePics/model7Search/1-4.png" alt=".." width="350"/>
+<img src="/readmePics/model8Search/1-1.png" alt=".." width="350"/> <img src="/readmePics/model8Search/1-2.png" alt=".." width="350"/>
+<img src="/readmePics/model8Search/1-3.png" alt=".." width="350"/> <img src="/readmePics/model8Search/1-4.png" alt=".." width="350"/>
 
 The results for learning rate = 1 are:
-<img src="/readmePics/model7Search/10-1.png" alt=".." width="350"/> <img src="/readmePics/model7Search/10-2.png" alt=".." width="350"/>
-<img src="/readmePics/model7Search/10-3.png" alt=".." width="350"/> <img src="/readmePics/model7Search/10-4.png" alt=".." width="350"/>
+<img src="/readmePics/model8Search/10-1.png" alt=".." width="350"/> <img src="/readmePics/model8Search/10-2.png" alt=".." width="350"/>
+<img src="/readmePics/model8Search/10-3.png" alt=".." width="350"/> <img src="/readmePics/model8Search/10-4.png" alt=".." width="350"/>
 
 ### train 
 
