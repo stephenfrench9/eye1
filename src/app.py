@@ -553,11 +553,11 @@ if __name__ == "__main__":
 
     print(model.summary())
 
-    train_l = 0; train_h = 28000;
+    train_l = 0; train_h = 2800;
     train_batch_size = 10
     train_batches = train_h/train_batch_size
 
-    valid_l = train_h; valid_h = 31000;
+    valid_l = train_h; valid_h = 3100;
     valid_batch_size = 5 # valid_batch_size =10 and valid_batches = 1 does not work ... cra
     valid_batches = (valid_h-valid_l)/valid_batch_size
 

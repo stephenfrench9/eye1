@@ -43,13 +43,13 @@ Below are what the typical results looked like for most of the search space.
 
 With the above results in mind, I train a model to 5 epochs with hyperparameters learning rate=.1, momentum=0, N=10, f=10. The precision for this model was .92, while the recall was .68. The losses as a function of training epoch are depicted below. 
  
-<img src="/readmePics/model6epochs5.png" alt=".." width="350"/>
+<img src="/readmePics/model6epochs5.png" alt=".." width="350"/> <img src="/readmePics/5-20-35-39model6weights.png" alt=".." width="350"/>
 
 It is arguable that this model is doing nothing more than drawing from a bernoulli distribution with p = .46
 
 The same model was also trained to 12 epochs, producing precision=.85 and recall=.80. Its training and validation loss as a function of epoch are given below. We do not see the signature shape of generalized learning - our validation curve is rather flat with no minimum. The training loss continues to improve, fitting the data in a way that will not generalize. 
 
-<img src="/readmePics/model6epochs12.png" alt=".." width="350"/>
+<img src="/readmePics/model6epochs12.png" alt=".." width="350"/> <img src="/readmePics/6-19-39-43model6weights.png" alt=".." width="350"/>
 
 ## Model 7
 ### search
@@ -76,7 +76,9 @@ We next switch optimizers, from keras's 'sgd' to 'adam', as well as add regulari
 <img src="/readmePics/model7Search/2-4_1.png" alt=".." width="350"/> <img src="/readmePics/model7Search/2-4_2.png" alt=".." width="350"/>
 <img src="/readmePics/model7Search/2-4_3.png" alt=".." width="350"/> <img src="/readmePics/model7Search/2-4_4.png" alt=".." width="350"/>
 
-We now attempt another search, except this time we set the architecture of the network with N=10 and f=10, as those numbers seem to have performed well in the last search. We search over the paramters alpha (learning rate) = [.01, .1, 1], beta1=[.8, .9], beta2=[.999], epsilon=[.1, 1]. 
+### search
+
+<img src="/readmePics/model7epochs12.png" alt=".." width="350"/> <img src="/readmePics/7-11-46-35model7weights.png" alt=".." width="350"/>
 
 ## Model 8
 ### search
